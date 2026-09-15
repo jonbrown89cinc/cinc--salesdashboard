@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Performance Dashboard</title>
+    <style>
+        :root {
+            --brand-1: #667eea;
+            --brand-2: #764ba2;
+            --brand-grad: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --accent-teal: #43c6ac;
+            --green: #22c55e;
+            --red: #ef4444;
+            --surface: #ffffff;
+            --bg: #f0f2ff;
+            --border: #e5e7eb;
+            --text-primary: #111827;
+            --text-secondary: #6b7280;
+            --text-muted: #9ca3af;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 16px rgba(102,126,234,0.12), 0 2px 6px rgba(0,0,0,0.06);
+            --shadow-lg: 0 12px 40px rgba(102,126,234,0.18), 0 4px 12px rgba(0,0,0,0.08);
+            --radius: 14px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            padding: 28px 20px 48px;
+            min-height: 100vh;
+        }
+
+        /* ── Page header ── */
+        .page-title {
+            text-align: center;
+            margin-bottom: 28px;
+            color: var(--brand-1);
+        }
+        .page-title h1 { font-size: 13px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; opacity: 0.7; }
+
+        .dashboard-wrapper { display: flex; flex-direction: column; gap: 24px; max-width: 1420px; margin: 0 auto; }
+
+        /* ── Section label above a card ── */
+        .section-label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            padding: 0 4px 8px;
+        }
+
+        /* ── Card ── */
+        .container {
+            background: var(--surface);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-md);
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        /* ── Card header ── */
+        .header {
+            background: var(--brand-grad);
+            color: white;
+            padding: 26px 32px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .header-logo { flex-shrink: 0; }
+        .header-logo img { height: 36px; display: block; }
+        .header-text { flex: 1; }
+        .header-text h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.3px; }
+        .header-text p { font-size: 13px; opacity: 0.85; margin-top: 3px; }
+        .header-badge {
+            background: rgba(255,255,255,0.18);
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 20px;
+            padding: 5px 14px;
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        /* ── Controls bar ── */
+        .controls {
+            padding: 14px 28px;
+            background: #fafbff;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+        .controls label { font-weight: 600; font-size: 13px; color: var(--text-secondary); white-space: nowrap; }
+        .controls select {
+            padding: 7px 32px 7px 12px;
+            border: 1.5px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 13px;
+            cursor: pointer;
+            background: white;
+            color: var(--text-primary);
+            transition: border-color 0.2s, box-shadow 0.2s;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b7280' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+        }
+        .controls select:focus { outline: none; border-color: var(--brand-1); box-shadow: 0 0 0 3px rgba(102,126,234,0.15); }
+        .controls select:hover { border-color: var(--brand-1); }
+        .controls-group { display: flex; align-items: center; gap: 8px; }
+
+        /* ── Table ── */
+        .table-container { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; }
+        thead tr { background: #f9fafb; border-bottom: 2px solid var(--border); }
+        th {
+            padding: 11px 16px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            color: var(--text-secondary);
+            white-space: nowrap;
+        }
+        td {
+            padding: 13px 16px;
+            border-bottom: 1px solid #f3f4f6;
+            font-size: 13.5px;
+            color: var(--text-primary);
+        }
+        tbody tr { transition: background-color 0.15s; }
+        tbody tr:hover { background-color: #f5f7ff; }
+        tbody tr:last-child td { border-bottom: none; }
+
+        /* rank medal colors */
+        .rank-1 .rank-num { color: #f59e0b; }
+        .rank-2 .rank-num { color: #94a3b8; }
+        .rank-3 .rank-num { color: #c2763a; }
+        .rank-num { font-weight: 800; font-size: 15px; color: var(--brand-1); }
+
+        .rep-name { font-weight: 600; }
+        .role-badge {
+            display: inline-block;
+            padding: 3px 9px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+        .role-NAE { background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; }
+        .role-SAE { background: #faf5ff; color: #7c3aed; border: 1px solid #e9d5ff; }
+        .role-AE  { background: #fff7ed; color: #c2410c; border: 1px solid #fed7aa; }
+
+        .currency { font-weight: 600; color: #059669; font-variant-numeric: tabular-nums; }
+        .num-cell { font-variant-numeric: tabular-nums; }
+        .close-high { color: #059669; font-weight: 700; }
+        .close-mid  { color: #d97706; font-weight: 600; }
+        .close-low  { color: #dc2626; font-weight: 600; }
+
+        .highlight-top3 { background: linear-gradient(90deg, #fffbeb 0%, transparent 60%); }
+        .highlight-top3:hover { background: linear-gradient(90deg, #fef3c7 0%, #f5f7ff 60%) !important; }
+
+        /* platform pill counts */
+        .plat-count { font-size: 12px; color: var(--text-secondary); }
+        .plat-zero  { color: #d1d5db; }
+
+        /* ── Stats footer ── */
+        .stats-footer {
+            padding: 16px 28px;
+            background: #fafbff;
+            border-top: 1px solid var(--border);
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 0;
+        }
+        .stat-box {
+            text-align: center;
+            padding: 12px 8px;
+            border-right: 1px solid var(--border);
+        }
+        .stat-box:last-child { border-right: none; }
+        .stat-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.7px; font-weight: 600; }
+        .stat-value { font-size: 19px; font-weight: 800; color: var(--brand-1); margin-top: 4px; letter-spacing: -0.5px; }
+
+        /* ── Toggle button ── */
+        .trend-toggle-btn {
+            background: var(--brand-grad);
+            color: white;
+            border: none;
+            padding: 9px 20px;
+            border-radius: 50px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            letter-spacing: 0.3px;
+            box-shadow: 0 4px 14px rgba(102,126,234,0.4);
+            transition: all 0.22s;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            white-space: nowrap;
+        }
+        .trend-toggle-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(102,126,234,0.5); }
+        .trend-toggle-btn .arrow { display: inline-block; transition: transform 0.3s; font-style: normal; font-size: 11px; }
+        .trend-toggle-btn.open .arrow { transform: rotate(180deg); }
+
+        /* ── Trend panel ── */
+        .trend-panel {
+            display: none;
+            background: var(--surface);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-md);
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+        .trend-panel.open { display: block; }
+
+        .trend-panel .header { background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%); }
+
+        .trend-controls {
+            padding: 14px 28px;
+            background: #fafbff;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .trend-controls label { font-weight: 600; font-size: 13px; color: var(--text-secondary); }
+        .trend-controls select {
+            padding: 7px 32px 7px 12px;
+            border: 1.5px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 13px;
+            cursor: pointer;
+            background: white;
+            color: var(--text-primary);
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b7280' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            transition: border-color 0.2s;
+        }
+        .trend-controls select:focus { outline: none; border-color: var(--brand-1); }
+        .trend-controls select:hover { border-color: var(--brand-1); }
+
+        /* ── Chart grid ── */
+        .charts-grid { display: grid; grid-template-columns: 1fr 1fr; }
+        .charts-grid-row2 { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--border); }
+        .chart-row-divider {
+            padding: 14px 28px 6px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border);
+            background: #fafbff;
+        }
+        .chart-section { padding: 26px 28px; border-right: 1px solid var(--border); }
+        .chart-section:last-child { border-right: none; }
+        .chart-section h2 { font-size: 15px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
+        .chart-section p.chart-sub { font-size: 12px; color: var(--text-muted); margin-bottom: 18px; }
+        .chart-wrap { position: relative; height: 340px; }
+
+        /* ── Trend legend ── */
+        .trend-legend {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            padding: 12px 28px 18px;
+            flex-wrap: wrap;
+            background: #fafbff;
+            border-bottom: 1px solid var(--border);
+        }
+        .legend-item { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--text-secondary); font-weight: 500; }
+        .legend-dot { width: 12px; height: 12px; border-radius: 3px; }
+
+        /* ── Divider connector between 2026 card and trend ── */
+        .trend-connector {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            color: var(--text-muted);
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            margin: -8px 0;
+        }
+        .trend-connector::before, .trend-connector::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        /* ── 2025 card dimmed ── */
+        .container-2025 { opacity: 0.88; }
+        .container-2025:hover { opacity: 1; transition: opacity 0.2s; }
+
+        @media (max-width: 900px) {
+            .charts-grid, .charts-grid-row2 { grid-template-columns: 1fr; }
+            .chart-section { border-right: none; border-bottom: 1px solid var(--border); }
+            .header { flex-direction: column; text-align: center; }
+            .header-badge { display: none; }
+            .stats-footer { grid-template-columns: repeat(2, 1fr); }
+            .stat-box:nth-child(2) { border-right: none; }
+        }
+        @media (max-width: 600px) {
+            body { padding: 12px 10px 32px; }
+            .dashboard-wrapper { gap: 16px; }
+            th, td { padding: 10px 10px; font-size: 12px; }
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+</head>
+<body>
+<div class="dashboard-wrapper">
+
+    <!-- 2026 DASHBOARD -->
+    <div class="container">
+        <div class="header">
+            <div class="header-logo"><img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODEyIiBoZWlnaHQ9IjE4OCIgdmlld0JveD0iMCAwIDgxMiAxODgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxwYXRoIGQ9Ik0zOTcuMzg5IDE0MS4yTDM4OS45NzEgMTMzLjc2OUMzODUuNTU2IDEyOS4zNDYgMzc4LjEzOCAxMjkuMTY5IDM3My44OTkgMTMzLjQxNUMzNzMuODk5IDEzMy40MTUgMzcyLjY2MyAxMzQuNjU0IDM3MC4xOSAxMzcuMTMxQzM2MC4xMjMgMTQ2LjY4NSAzNDcuMDUzIDE1MS45OTMgMzMzLjQ1NCAxNTEuOTkzQzMwMy4yNTIgMTUxLjk5MyAyNzguNTI2IDEyNi4zMzggMjc4LjUyNiA5NC42NjY0QzI3OC41MjYgNjIuOTk1MSAzMDMuMDc2IDM3LjMzOTUgMzMzLjQ1NCAzNy4zMzk1QzM0Ny4wNTMgMzcuMzM5NSAzNjAuMTIzIDQyLjQ3MDYgMzcwLjE5IDUyLjAyNTFMMzczLjM2OSA1NS4yMDk5QzM3Ny42MDggNTkuNDU2NCAzODUuMDI2IDU5LjQ1NjQgMzg5LjQ0MSA1NC44NTYxTDM5Ni44NTkgNDcuNDI0OEM0MDEuMjc1IDQzLjAwMTQgNDAxLjQ1MSAzNS41NzAyIDM5Ny4yMTIgMzEuMzIzN0wzOTIuMDkgMjYuMzY5NUMzNzUuODQyIDExLjY4MzkgMzU1LjE3OCAzLjU0NDkyIDMzMy40NTQgMy41NDQ5MkMyODQuNTMxIDMuNTQ0OTIgMjQ0Ljc5MiA0NC40MTY5IDI0NC43OTIgOTQuODQzNEMyNDQuNzkyIDE0NS4yNyAyODQuNTMxIDE4Ni4xNDIgMzMzLjQ1NCAxODYuMTQyQzM1NS4zNTQgMTg2LjE0MiAzNzYuMzcyIDE3Ny44MjYgMzkyLjc5NyAxNjIuNzg2TDM5Ny45MTkgMTU3LjgzMkM0MDEuOTgxIDE1My4wNTUgNDAxLjk4MSAxNDUuNjI0IDM5Ny4zODkgMTQxLjJaIiBmaWxsPSJ3aGl0ZSIvPgo8cGF0aCBkPSJNNTU2LjE2OCAyLjgzNDk2QzUxMS40ODQgMi44MzQ5NiA0NzguNDU2IDQwLjE2ODIgNDc4LjQ1NiA4Ni4xNzEzVjE3My45MzFDNDc4LjQ1NiAxODAuNDc4IDQ4My43NTUgMTg1Ljc4NiA0ODkuOTM2IDE4NS43ODZINTAwLjM1N0M1MDYuNTM4IDE4NS43ODYgNTExLjgzNyAxODAuMzAxIDUxMS44MzcgMTczLjkzMVY4MS4zOTQxQzUxMS44MzcgNTYuNjIzMiA1MzEuNDQxIDM2LjA5ODcgNTU1LjI4NSAzNi4wOTg3SDU1Ni4zNDRINTU3LjQwNEM1ODEuMjQ3IDM2LjA5ODcgNjAwLjg1MiA1Ni40NDYzIDYwMC44NTIgODEuMzk0MVYxNzMuOTMxQzYwMC44NTIgMTgwLjQ3OCA2MDYuMTUgMTg1Ljc4NiA2MTIuMzMyIDE4NS43ODZINjIyLjc1MkM2MjguOTM0IDE4NS43ODYgNjM0LjIzMiAxODAuMzAxIDYzNC4yMzIgMTczLjkzMVY4Ni4xNzEzQzYzMy44NzkgNDAuNjk5IDYwMC44NTIgMi44MzQ5NiA1NTYuMTY4IDIuODM0OTZaIiBmaWxsPSJ3aGl0ZSIvPgo8cGF0aCBkPSJNNDU2LjU1NCA4NS40NjM2VjE0LjE1ODhDNDU2LjU1NCA4LjE0MzAxIDQ1MS4yNTYgMi44MzQ5NiA0NDQuODk4IDIuODM0OTZINDM0LjMwMUM0MjcuOTQyIDIuODM0OTYgNDIyLjY0NCA3Ljk2NjA3IDQyMi42NDQgMTQuMTU4OFYxMTkuNjEyVjE3NC44MTZDNDIyLjY0NCAxODAuODMyIDQyNy45NDIgMTg2LjE0IDQzNC4zMDEgMTg2LjE0SDQ0NC44OThDNDUxLjI1NiAxODYuMTQgNDU2LjU1NCAxODEuMDA4IDQ1Ni41NTQgMTc0LjgxNlY4NS40NjM2WiIgZmlsbD0id2hpdGUiLz4KPHBhdGggZD0iTTgwOC41NTEgMTQxLjJMODAxLjEzMyAxMzMuNzY5Qzc5Ni43MTggMTI5LjM0NiA3ODkuMyAxMjkuMTY5IDc4NS4wNjEgMTMzLjQxNUM3ODUuMDYxIDEzMy40MTUgNzgzLjgyNSAxMzQuNjU0IDc4MS4zNTIgMTM3LjEzMUM3NzEuMjg1IDE0Ni42ODUgNzU4LjIxNiAxNTEuOTkzIDc0NC42MTYgMTUxLjk5M0M3MTQuNDE1IDE1MS45OTMgNjg5LjY4OCAxMjYuMzM4IDY4OS42ODggOTQuNjY2NEM2ODkuNjg4IDYyLjk5NTEgNzE0LjIzOCAzNy4zMzk1IDc0NC42MTYgMzcuMzM5NUM3NTguMjE2IDM3LjMzOTUgNzcxLjI4NSA0Mi40NzA2IDc4MS4zNTIgNTIuMDI1MUw3ODQuNTMxIDU1LjIwOTlDNzg4Ljc3IDU5LjQ1NjQgNzk2LjE4OCA1OS40NTY0IDgwMC42MDQgNTQuODU2MUw4MDguMDIxIDQ3LjQyNDhDODEyLjQzNyA0My4wMDE0IDgxMi42MTQgMzUuNTcwMiA4MDguMzc1IDMxLjMyMzdMODAzLjI1MyAyNi4zNjk1Qzc4Ny4wMDQgMTEuNjgzOSA3NjYuMzQgMy41NDQ5MiA3NDQuNjE2IDMuNTQ0OTJDNjk1LjY5MyAzLjU0NDkyIDY1NS45NTUgNDQuNDE2OSA2NTUuOTU1IDk0Ljg0MzRDNjU1Ljk1NSAxNDUuMjcgNjk1LjY5MyAxODYuMTQyIDc0NC42MTYgMTg2LjE0MkM3NjYuNTE3IDE4Ni4xNDIgNzg3LjUzNCAxNzcuODI2IDgwMy45NTkgMTYyLjc4Nkw4MDkuMDgxIDE1Ny44MzJDODEzLjE0MyAxNTMuMDU1IDgxMi45NjcgMTQ1LjYyNCA4MDguNTUxIDE0MS4yWiIgZmlsbD0id2hpdGUiLz4KPHBhdGggZD0iTTE2MS42MDQgMTg1LjQyOEgxNDguNzExQzE0MC45NCAxODUuNDI4IDEzNC41ODIgMTc5LjA1OCAxMzQuNTgyIDE3MS4yNzNWODEuNTY2OUMxMzQuNTgyIDczLjc4MTggMTQwLjk0IDY3LjQxMjEgMTQ4LjcxMSA2Ny40MTIxSDE2MS43ODFDMTY5LjU1MiA2Ny40MTIxIDE3NS45MSA3My43ODE4IDE3NS45MSA4MS41NjY5VjE3MS4yNzNDMTc1LjczNCAxNzkuMDU4IDE2OS4zNzUgMTg1LjQyOCAxNjEuNjA0IDE4NS40MjhaIiBmaWxsPSJ3aGl0ZSIvPgo8cGF0aCBkPSJNOTYuNDMyNCAxODUuNDI4SDgzLjM2MjdDNzUuNTkxNiAxODUuNDI4IDY5LjIzMzQgMTc5LjA1OSA2OS4yMzM0IDE3MS4yNzRWMTIwLjg0N0M2OS4yMzM0IDExMy4wNjIgNzUuNTkxNiAxMDYuNjkyIDgzLjM2MjcgMTA2LjY5Mkg5Ni40MzI0QzEwNC4yMDMgMTA2LjY5MiAxMTAuNTYyIDExMy4wNjIgMTEwLjU2MiAxMjAuODQ3VjE3MS4yNzRDMTEwLjU2MiAxNzkuMDU5IDEwNC4yMDMgMTg1LjQyOCA5Ni40MzI0IDE4NS40MjhaIiBmaWxsPSJ3aGl0ZSIvPgo8cGF0aCBkPSJNMzAuOTA3NCAxODUuNDI2SDE4LjAxNDNDMTAuMjQzMiAxODUuNDI2IDMuODg1MDEgMTc5LjA1NyAzLjg4NTAxIDE3MS4yNzFWMTU4LjE3OEMzLjg4NTAxIDE1MC4zOTMgMTAuMjQzMiAxNDQuMDIzIDE4LjAxNDMgMTQ0LjAyM0gzMS4wODRDMzguODU1MSAxNDQuMDIzIDQ1LjIxMzMgMTUwLjM5MyA0NS4yMTMzIDE1OC4xNzhWMTcxLjI3MUM0NS4yMTMzIDE3OS4wNTcgMzguODU1MSAxODUuNDI2IDMwLjkwNzQgMTg1LjQyNloiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik0zMC43MzEzIDEyNS4wOTNIMTcuNjYxN0M3Ljk0Nzc1IDEyNS4wOTMgMCAxMTcuMTMxIDAgMTA3LjRWMTcuNjkzNUMwIDcuOTYyMDcgNy45NDc3NSAwIDE3LjY2MTcgMEgzMC43MzEzQzQwLjQ0NTIgMCA0OC4zOTI5IDcuOTYyMDcgNDguMzkyOSAxNy42OTM1VjEwNy40QzQ4LjU2OTYgMTE3LjEzMSA0MC42MjE4IDEyNS4wOTMgMzAuNzMxMyAxMjUuMDkzWk0xNy44MzgzIDYuOTAwNDdDMTIuMDA5OSA2LjkwMDQ3IDcuMjQxMjggMTEuNjc3NyA3LjI0MTI4IDE3LjUxNjZWMTA3LjIyM0M3LjI0MTI4IDExMy4wNjEgMTIuMDA5OSAxMTcuODM5IDE3LjgzODMgMTE3LjgzOUgzMC45MDc5QzM2LjczNjMgMTE3LjgzOSA0MS41MDQ5IDExMy4wNjEgNDEuNTA0OSAxMDcuMjIzVjE3LjY5MzVDNDEuNTA0OSAxMS44NTQ2IDM2LjczNjMgNy4wNzc0IDMwLjkwNzkgNy4wNzc0SDE3LjgzODNWNi45MDA0N1pNOTYuMDc5NCA4NS44MTM1SDgzLjE4NjRDNzMuNDcyNSA4NS44MTM1IDY1LjUyNDggNzcuODUxNCA2NS41MjQ4IDY4LjEyVjE3LjY5MzVDNjUuNzAxNCA3Ljc4NTE0IDczLjY0OTEgMCA4My4xODY0IDBIOTYuMDc5NEMxMDUuNzkzIDAgMTEzLjc0MSA3Ljk2MjA3IDExMy43NDEgMTcuNjkzNVY2OC4xMkMxMTMuNzQxIDc3Ljg1MTQgMTA1Ljc5MyA4NS44MTM1IDk2LjA3OTQgODUuODEzNVpNODMuMDA5OCA2LjkwMDQ3Qzc3LjE4MTUgNi45MDA0NyA3Mi40MTI4IDExLjY3NzcgNzIuNDEyOCAxNy42OTM1VjY3Ljk0M0M3Mi40MTI4IDczLjc4MTkgNzcuMTgxNSA3OC41NTkxIDgzLjAwOTggNzguNTU5MUg5NS45MDI4QzEwMS43MzEgNzguNTU5MSAxMDYuNSA3My43ODE5IDEwNi41IDY3Ljk0M1YxNy42OTM1QzEwNi41IDExLjg1NDYgMTAxLjczMSA3LjA3NzQgOTUuOTAyOCA3LjA3NzRIODMuMDA5OFY2LjkwMDQ3Wk0xNjEuNDI4IDQ4LjQ4MDJIMTQ4LjUzNUMxMzguODIxIDQ4LjQ4MDIgMTMwLjg3MyA0MC41MTgxIDEzMC44NzMgMzAuNzg2N1YxNy42OTM1QzEzMC44NzMgNy45NjIwNyAxMzguODIxIDAgMTQ4LjUzNSAwSDE2MS40MjhDMTcxLjE0MSAwIDE3OS4wODkgNy45NjIwNyAxNzkuMDg5IDE3LjY5MzVWMzAuNzg2N0MxNzkuMDg5IDQwLjUxODEgMTcxLjE0MSA0OC40ODAyIDE2MS40MjggNDguNDgwMlpNMTQ4LjUzNSA2LjkwMDQ3QzE0Mi43MDYgNi45MDA0NyAxMzcuOTM4IDExLjY3NzcgMTM3LjkzOCAxNy41MTY2VjMwLjYwOTdDMTM3LjkzOCAzNi40NDg2IDE0Mi43MDYgNDEuMjI1OCAxNDguNTM1IDQxLjIyNThIMTYxLjQyOEMxNjcuMjU2IDQxLjIyNTggMTcyLjAyNSAzNi40NDg2IDE3Mi4wMjUgMzAuNjA5N1YxNy41MTY2QzE3Mi4wMjUgMTEuNjc3NyAxNjcuMjU2IDYuOTAwNDcgMTYxLjQyOCA2LjkwMDQ3SDE0OC41MzVWNi45MDA0N1oiIGZpbGw9IndoaXRlIi8+Cjwvc3ZnPgo=" alt="CINC"></div>
+            <div class="header-text">
+                <h1>Sales Performance Dashboard — 2026</h1>
+                <p id="header2026sub">June 2026 · Interactive ranking analysis for your sales team</p>
+            </div>
+            <div class="header-badge">2026 YTD</div>
+        </div>
+        <div class="controls">
+            <div class="controls-group">
+                <label for="month2026">Period:</label>
+                <select id="month2026" onchange="renderDashboard('2026')">
+                    <option value="2026_Jan">January 2026</option>
+                    <option value="2026_Feb">February 2026</option>
+                    <option value="2026_Mar">March 2026</option>
+                    <option value="2026_Apr">April 2026</option>
+                    <option value="2026_May">May 2026</option>
+                    <option value="2026_Jun">June 2026</option>
+                    <option value="2026_Jul">July 2026</option>
+                    <option value="2026_Aug" selected>August 2026</option>
+                    <option disabled>──────────────</option>
+                    <option value="2026_Q1">Q1 2026 (Jan–Mar)</option>
+                    <option value="2026_Q2">Q2 2026 (Apr–Jun)</option>
+                    <option value="2026_Q3">Q3 2026 (Jul–Aug)</option>
+                    <option value="2026_H1">H1 2026 (Jan–Jun)</option>
+                    <option value="2026_YTD">YTD 2026 (Jan–Aug)</option>
+                </select>
+            </div>
+            <div class="controls-group">
+                <label for="sortBy2026">Sort By:</label>
+                <select id="sortBy2026" onchange="renderDashboard('2026')">
+                    <option value="Avg_ACV">Average ACV (Default)</option>
+                    <option value="Total_Revenue">Total Revenue</option>
+                    <option value="Total_Units">Total Units Sold</option>
+                    <option value="Avg_MRR">Average MRR</option>
+                    <option value="Avg_Setup_Fee">Average Setup Fee</option>
+                    <option value="Close_Rate">Close Rate</option>
+                    <option value="Solo">Solo Units</option>
+                    <option value="Ramp">Ramp Units</option>
+                    <option value="Pro">Pro Units</option>
+                    <option value="Select">Select Units</option>
+                    <option value="Prime">Prime Units</option>
+                </select>
+            </div>
+        </div>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th><th>Sales Rep</th><th>Role</th><th>Units</th>
+                        <th>Solo</th><th>Ramp</th><th>Pro</th><th>Select</th><th>Prime</th>
+                        <th>Appts</th><th>Close Rate</th>
+                        <th>Avg ACV</th><th>Avg MRR</th><th>Avg Setup</th><th>Total Revenue</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody2026"></tbody>
+            </table>
+        </div>
+        <div class="stats-footer">
+            <div class="stat-box"><div class="stat-label">Total Units Sold</div><div class="stat-value" id="totalUnits2026">—</div></div>
+            <div class="stat-box"><div class="stat-label">Avg Setup Fee</div><div class="stat-value" id="avgSetupFee2026">—</div></div>
+            <div class="stat-box"><div class="stat-label">Team Avg ACV</div><div class="stat-value" id="avgACV2026">—</div></div>
+            <div class="stat-box"><div class="stat-label">Team Avg MRR</div><div class="stat-value" id="avgMRR2026">—</div></div>
+            <div class="stat-box"><div class="stat-label">Team Close Rate</div><div class="stat-value" id="teamCloseRate2026">—</div></div>
+            <div class="stat-box"><div class="stat-label">Total Revenue</div><div class="stat-value" id="totalRevenue2026">—</div></div>
+            <div class="stat-box" style="display:flex;align-items:center;justify-content:center;">
+                <button class="trend-toggle-btn" id="trendToggleBtn" onclick="toggleTrend()">
+                    <span>📈 Year-Over-Year Trends</span>
+                    <i class="arrow">▼</i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TREND PANEL — sits between 2026 and 2025 -->
+    <div class="trend-panel" id="trendPanel">
+        <div class="header">
+            <div class="header-logo"><img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODEyIiBoZWlnaHQ9IjE4OCIgdmlld0JveD0iMCAwIDgxMiAxODgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxwYXRoIGQ9Ik0zOTcuMzg5IDE0MS4yTDM4OS45NzEgMTMzLjc2OUMzODUuNTU2IDEyOS4zNDYgMzc4LjEzOCAxMjkuMTY5IDM3My44OTkgMTMzLjQxNUMzNzMuODk5IDEzMy40MTUgMzcyLjY2MyAxMzQuNjU0IDM3MC4xOSAxMzcuMTMxQzM2MC4xMjMgMTQ2LjY4NSAzNDcuMDUzIDE1MS45OTMgMzMzLjQ1NCAxNTEuOTkzQzMwMy4yNTIgMTUxLjk5MyAyNzguNTI2IDEyNi4zMzggMjc4LjUyNiA5NC42NjY0QzI3OC41MjYgNjIuOTk1MSAzMDMuMDc2IDM3LjMzOTUgMzMzLjQ1NCAzNy4zMzk1QzM0Ny4wNTMgMzcuMzM5NSAzNjAuMTIzIDQyLjQ3MDYgMzcwLjE5IDUyLjAyNTFMMzczLjM2OSA1NS4yMDk5QzM3Ny42MDggNTkuNDU2NCAzODUuMDI2IDU5LjQ1NjQgMzg5LjQ0MSA1NC44NTYxTDM5Ni44NTkgNDcuNDI0OEM0MDEuMjc1IDQzLjAwMTQgNDAxLjQ1MSAzNS41NzAyIDM5Ny4yMTIgMzEuMzIzN0wzOTIuMDkgMjYuMzY5NUMzNzUuODQyIDExLjY4MzkgMzU1LjE3OCAzLjU0NDkyIDMzMy40NTQgMy41NDQ5MkMyODQuNTMxIDMuNTQ0OTIgMjQ0Ljc5MiA0NC40MTY5IDI0NC43OTIgOTQuODQzNEMyNDQuNzkyIDE0NS4yNyAyODQuNTMxIDE4Ni4xNDIgMzMzLjQ1NCAxODYuMTQyQzM1NS4zNTQgMTg2LjE0MiAzNzYuMzcyIDE3Ny44MjYgMzkyLjc5NyAxNjIuNzg2TDM5Ny45MTkgMTU3LjgzMkM0MDEuOTgxIDE1My4wNTUgNDAxLjk4MSAxNDUuNjI0IDM5Ny4zODkgMTQxLjJaIiBmaWxsPSJ3aGl0ZSIvPgo8cGF0aCBkPSJNNTU2LjE2OCAyLjgzNDk2QzUxMS40ODQgMi44MzQ5NiA0NzguNDU2IDQwLjE2ODIgNDc4LjQ1NiA4Ni4xNzEzVjE3My45MzFDNDc4LjQ1NiAxODAuNDc4IDQ4My43NTUgMTg1Ljc4NiA0ODkuOTM2IDE4NS43ODZINTAwLjM1N0M1MDYuNTM4IDE4NS43ODYgNTExLjgzNyAxODAuMzAxIDUxMS44MzcgMTczLjkzMVY4MS4zOTQxQzUxMS44MzcgNTYuNjIzMiA1MzEuNDQxIDM2LjA5ODcgNTU1LjI4NSAzNi4wOTg3SDU1Ni4zNDRINTU3LjQwNEM1ODEuMjQ3IDM2LjA5ODcgNjAwLjg1MiA1Ni40NDYzIDYwMC44NTIgODEuMzk0MVYxNzMuOTMxQzYwMC44NTIgMTgwLjQ3OCA2MDYuMTUgMTg1Ljc4NiA2MTIuMzMyIDE4NS43ODZINjIyLjc1MkM2MjguOTM0IDE4NS43ODYgNjM0LjIzMiAxODAuMzAxIDYzNC4yMzIgMTczLjkzMVY4Ni4xNzEzQzYzMy44NzkgNDAuNjk5IDYwMC44NTIgMi44MzQ5NiA1NTYuMTY4IDIuODM0OTZaIiBmaWxsPSJ3aGl0ZSIvPgo8cGF0aCBkPSJNNDU2LjU1NCA4NS40NjM2VjE0LjE1ODhDNDU2LjU1NCA4LjE0MzAxIDQ1MS4yNTYgMi44MzQ5NiA0NDQuODk4IDIuODM0OTZINDM0LjMwMUM0MjcuOTQyIDIuODM0OTYgNDIyLjY0NCA3Ljk2NjA3IDQyMi42NDQgMTQuMTU4OFYxMTkuNjEyVjE3NC44MTZDNDIyLjY0NCAxODAuODMyIDQyNy45NDIgMTg2LjE0IDQzNC4zMDEgMTg2LjE0SDQ0NC44OThDNDUxLjI1NiAxODYuMTQgNDU2LjU1NCAxODEuMDA4IDQ1Ni41NTQgMTc0LjgxNlY4NS40NjM2WiIgZmlsbD0id2hpdGUiLz4KPHBhdGggZD0iTTgwOC41NTEgMTQxLjJMODAxLjEzMyAxMzMuNzY5Qzc5Ni43MTggMTI5LjM0NiA3ODkuMyAxMjkuMTY5IDc4NS4wNjEgMTMzLjQxNUM3ODUuMDYxIDEzMy40MTUgNzgzLjgyNSAxMzQuNjU0IDc4MS4zNTIgMTM3LjEzMUM3NzEuMjg1IDE0Ni42ODUgNzU4LjIxNiAxNTEuOTkzIDc0NC42MTYgMTUxLjk5M0M3MTQuNDE1IDE1MS45OTMgNjg5LjY4OCAxMjYuMzM4IDY4OS42ODggOTQuNjY2NEM2ODkuNjg4IDYyLjk5NTEgNzE0LjIzOCAzNy4zMzk1IDc0NC42MTYgMzcuMzM5NUM3NTguMjE2IDM3LjMzOTUgNzcxLjI4NSA0Mi40NzA2IDc4MS4zNTIgNTIuMDI1MUw3ODQuNTMxIDU1LjIwOTlDNzg4Ljc3IDU5LjQ1NjQgNzk2LjE4OCA1OS40NTY0IDgwMC42MDQgNTQuODU2MUw4MDguMDIxIDQ3LjQyNDhDODEyLjQzNyA0My4wMDE0IDgxMi42MTQgMzUuNTcwMiA4MDguMzc1IDMxLjMyMzdMODAzLjI1MyAyNi4zNjk1Qzc4Ny4wMDQgMTEuNjgzOSA3NjYuMzQgMy41NDQ5MiA3NDQuNjE2IDMuNTQ0OTJDNjk1LjY5MyAzLjU0NDkyIDY1NS45NTUgNDQuNDE2OSA2NTUuOTU1IDk0Ljg0MzRDNjU1Ljk1NSAxNDUuMjcgNjk1LjY5MyAxODYuMTQyIDc0NC42MTYgMTg2LjE0MkM3NjYuNTE3IDE4Ni4xNDIgNzg3LjUzNCAxNzcuODI2IDgwMy45NTkgMTYyLjc4Nkw4MDkuMDgxIDE1Ny44MzJDODEzLjE0MyAxNTMuMDU1IDgxMi45NjcgMTQ1LjYyNCA4MDguNTUxIDE0MS4yWiIgZmlsbD0id2hpdGUiLz4KPHBhdGggZD0iTTE2MS42MDQgMTg1LjQyOEgxNDguNzExQzE0MC45NCAxODUuNDI4IDEzNC41ODIgMTc5LjA1OCAxMzQuNTgyIDE3MS4yNzNWODEuNTY2OUMxMzQuNTgyIDczLjc4MTggMTQwLjk0IDY3LjQxMjEgMTQ4LjcxMSA2Ny40MTIxSDE2MS43ODFDMTY5LjU1MiA2Ny40MTIxIDE3NS45MSA3My43ODE4IDE3NS45MSA4MS41NjY5VjE3MS4yNzNDMTc1LjczNCAxNzkuMDU4IDE2OS4zNzUgMTg1LjQyOCAxNjEuNjA0IDE4NS40MjhaIiBmaWxsPSJ3aGl0ZSIvPgo8cGF0aCBkPSJNOTYuNDMyNCAxODUuNDI4SDgzLjM2MjdDNzUuNTkxNiAxODUuNDI4IDY5LjIzMzQgMTc5LjA1OSA2OS4yMzM0IDE3MS4yNzRWMTIwLjg0N0M2OS4yMzM0IDExMy4wNjIgNzUuNTkxNiAxMDYuNjkyIDgzLjM2MjcgMTA2LjY5Mkg5Ni40MzI0QzEwNC4yMDMgMTA2LjY5MiAxMTAuNTYyIDExMy4wNjIgMTEwLjU2MiAxMjAuODQ3VjE3MS4yNzRDMTEwLjU2MiAxNzkuMDU5IDEwNC4yMDMgMTg1LjQyOCA5Ni40MzI0IDE4NS40MjhaIiBmaWxsPSJ3aGl0ZSIvPgo8cGF0aCBkPSJNMzAuOTA3NCAxODUuNDI2SDE4LjAxNDNDMTAuMjQzMiAxODUuNDI2IDMuODg1MDEgMTc5LjA1NyAzLjg4NTAxIDE3MS4yNzFWMTU4LjE3OEMzLjg4NTAxIDE1MC4zOTMgMTAuMjQzMiAxNDQuMDIzIDE4LjAxNDMgMTQ0LjAyM0gzMS4wODRDMzguODU1MSAxNDQuMDIzIDQ1LjIxMzMgMTUwLjM5MyA0NS4yMTMzIDE1OC4xNzhWMTcxLjI3MUM0NS4yMTMzIDE3OS4wNTcgMzguODU1MSAxODUuNDI2IDMwLjkwNzQgMTg1LjQyNloiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik0zMC43MzEzIDEyNS4wOTNIMTcuNjYxN0M3Ljk0Nzc1IDEyNS4wOTMgMCAxMTcuMTMxIDAgMTA3LjRWMTcuNjkzNUMwIDcuOTYyMDcgNy45NDc3NSAwIDE3LjY2MTcgMEgzMC43MzEzQzQwLjQ0NTIgMCA0OC4zOTI5IDcuOTYyMDcgNDguMzkyOSAxNy42OTM1VjEwNy40QzQ4LjU2OTYgMTE3LjEzMSA0MC42MjE4IDEyNS4wOTMgMzAuNzMxMyAxMjUuMDkzWk0xNy44MzgzIDYuOTAwNDdDMTIuMDA5OSA2LjkwMDQ3IDcuMjQxMjggMTEuNjc3NyA3LjI0MTI4IDE3LjUxNjZWMTA3LjIyM0M3LjI0MTI4IDExMy4wNjEgMTIuMDA5OSAxMTcuODM5IDE3LjgzODMgMTE3LjgzOUgzMC45MDc5QzM2LjczNjMgMTE3LjgzOSA0MS41MDQ5IDExMy4wNjEgNDEuNTA0OSAxMDcuMjIzVjE3LjY5MzVDNDEuNTA0OSAxMS44NTQ2IDM2LjczNjMgNy4wNzc0IDMwLjkwNzkgNy4wNzc0SDE3LjgzODNWNi45MDA0N1pNOTYuMDc5NCA4NS44MTM1SDgzLjE4NjRDNzMuNDcyNSA4NS44MTM1IDY1LjUyNDggNzcuODUxNCA2NS41MjQ4IDY4LjEyVjE3LjY5MzVDNjUuNzAxNCA3Ljc4NTE0IDczLjY0OTEgMCA4My4xODY0IDBIOTYuMDc5NEMxMDUuNzkzIDAgMTEzLjc0MSA3Ljk2MjA3IDExMy43NDEgMTcuNjkzNVY2OC4xMkMxMTMuNzQxIDc3Ljg1MTQgMTA1Ljc5MyA4NS44MTM1IDk2LjA3OTQgODUuODEzNVpNODMuMDA5OCA2LjkwMDQ3Qzc3LjE4MTUgNi45MDA0NyA3Mi40MTI4IDExLjY3NzcgNzIuNDEyOCAxNy42OTM1VjY3Ljk0M0M3Mi40MTI4IDczLjc4MTkgNzcuMTgxNSA3OC41NTkxIDgzLjAwOTggNzguNTU5MUg5NS45MDI4QzEwMS43MzEgNzguNTU5MSAxMDYuNSA3My43ODE5IDEwNi41IDY3Ljk0M1YxNy42OTM1QzEwNi41IDExLjg1NDYgMTAxLjczMSA3LjA3NzQgOTUuOTAyOCA3LjA3NzRIODMuMDA5OFY2LjkwMDQ3Wk0xNjEuNDI4IDQ4LjQ4MDJIMTQ4LjUzNUMxMzguODIxIDQ4LjQ4MDIgMTMwLjg3MyA0MC41MTgxIDEzMC44NzMgMzAuNzg2N1YxNy42OTM1QzEzMC44NzMgNy45NjIwNyAxMzguODIxIDAgMTQ4LjUzNSAwSDE2MS40MjhDMTcxLjE0MSAwIDE3OS4wODkgNy45NjIwNyAxNzkuMDg5IDE3LjY5MzVWMzAuNzg2N0MxNzkuMDg5IDQwLjUxODEgMTcxLjE0MSA0OC40ODAyIDE2MS40MjggNDguNDgwMlpNMTQ4LjUzNSA2LjkwMDQ3QzE0Mi43MDYgNi45MDA0NyAxMzcuOTM4IDExLjY3NzcgMTM3LjkzOCAxNy41MTY2VjMwLjYwOTdDMTM3LjkzOCAzNi40NDg2IDE0Mi43MDYgNDEuMjI1OCAxNDguNTM1IDQxLjIyNThIMTYxLjQyOEMxNjcuMjU2IDQxLjIyNTggMTcyLjAyNSAzNi40NDg2IDE3Mi4wMjUgMzAuNjA5N1YxNy41MTY2QzE3Mi4wMjUgMTEuNjc3NyAxNjcuMjU2IDYuOTAwNDcgMTYxLjQyOCA2LjkwMDQ3SDE0OC41MzVWNi45MDA0N1oiIGZpbGw9IndoaXRlIi8+Cjwvc3ZnPgo=" alt="CINC"></div>
+            <div class="header-text">
+                <h1>Year-Over-Year Performance Trends</h1>
+                <p>2025 Actual Full Year vs. 2026 Annualized Pace · Avg ACV, MRR, Units &amp; Revenue</p>
+            </div>
+        </div>
+
+        <div class="trend-controls">
+            <label for="trendMetric">Metric:</label>
+            <select id="trendMetric" onchange="renderTrendCharts()">
+                <option value="Avg_ACV">Average ACV</option>
+                <option value="Avg_MRR">Average MRR</option>
+            </select>
+        </div>
+
+        <div class="trend-legend">
+            <div class="legend-item"><div class="legend-dot" style="background:#667eea;"></div>2025 Actual Full Year</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#43c6ac;"></div>2026 Annualized Pace</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#22c55e;"></div>Trending Up</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#ef4444;"></div>Trending Down</div>
+        </div>
+
+        <div class="charts-grid">
+            <div class="chart-section">
+                <h2>Side-by-Side Comparison</h2>
+                <p class="chart-sub" id="subSideBySide">2025 full-year average vs. 2026 per rep</p>
+                <div class="chart-wrap"><canvas id="sideBySideChart"></canvas></div>
+            </div>
+            <div class="chart-section">
+                <h2>% Change Leaderboard</h2>
+                <p class="chart-sub" id="subPctChange">Ranked by improvement from 2025 → 2026</p>
+                <div class="chart-wrap"><canvas id="pctChangeChart"></canvas></div>
+            </div>
+        </div>
+
+        <div class="chart-row-divider">Volume &amp; Revenue Breakdown</div>
+        <div class="charts-grid-row2">
+            <div class="chart-section">
+                <h2>Total Units Sold</h2>
+                <p class="chart-sub" id="subUnits">2025 full year vs. 2026 per rep — sorted by 2025 volume</p>
+                <div class="chart-wrap"><canvas id="unitsChart"></canvas></div>
+            </div>
+            <div class="chart-section">
+                <h2>Total Revenue</h2>
+                <p class="chart-sub" id="subRevenue">2025 full year vs. 2026 per rep — sorted by 2025 revenue</p>
+                <div class="chart-wrap"><canvas id="revenueChart"></canvas></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2025 DASHBOARD -->
+    <div class="container container-2025">
+        <div class="header" style="background: linear-gradient(135deg, #374151 0%, #1f2937 100%);">
+            <div class="header-logo"><img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODEyIiBoZWlnaHQ9IjE4OCIgdmlld0JveD0iMCAwIDgxMiAxODgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxwYXRoIGQ9Ik0zOTcuMzg5IDE0MS4yTDM4OS45NzEgMTMzLjc2OUMzODUuNTU2IDEyOS4zNDYgMzc4LjEzOCAxMjkuMTY5IDM3My44OTkgMTMzLjQxNUMzNzMuODk5IDEzMy40MTUgMzcyLjY2MyAxMzQuNjU0IDM3MC4xOSAxMzcuMTMxQzM2MC4xMjMgMTQ2LjY4NSAzNDcuMDUzIDE1MS45OTMgMzMzLjQ1NCAxNTEuOTkzQzMwMy4yNTIgMTUxLjk5MyAyNzguNTI2IDEyNi4zMzggMjc4LjUyNiA5NC42NjY0QzI3OC41MjYgNjIuOTk1MSAzMDMuMDc2IDM3LjMzOTUgMzMzLjQ1NCAzNy4zMzk1QzM0Ny4wNTMgMzcuMzM5NSAzNjAuMTIzIDQyLjQ3MDYgMzcwLjE5IDUyLjAyNTFMMzczLjM2OSA1NS4yMDk5QzM3Ny42MDggNTkuNDU2NCAzODUuMDI2IDU5LjQ1NjQgMzg5LjQ0MSA1NC44NTYxTDM5Ni44NTkgNDcuNDI0OEM0MDEuMjc1IDQzLjAwMTQgNDAxLjQ1MSAzNS41NzAyIDM5Ny4yMTIgMzEuMzIzN0wzOTIuMDkgMjYuMzY5NUMzNzUuODQyIDExLjY4MzkgMzU1LjE3OCAzLjU0NDkyIDMzMy40NTQgMy41NDQ5MkMyODQuNTMxIDMuNTQ0OTIgMjQ0Ljc5MiA0NC40MTY5IDI0NC43OTIgOTQuODQzNEMyNDQuNzkyIDE0NS4yNyAyODQuNTMxIDE4Ni4xNDIgMzMzLjQ1NCAxODYuMTQyQzM1NS4zNTQgMTg2LjE0MiAzNzYuMzcyIDE3Ny44MjYgMzkyLjc5NyAxNjIuNzg2TDM5Ny45MTkgMTU3LjgzMkM0MDEuOTgxIDE1My4wNTUgNDAxLjk4MSAxNDUuNjI0IDM5Ny4zODkgMTQxLjJaIiBmaWxsPSJ3aGl0ZSIvPgo8cGF0aCBkPSJNNTU2LjE2OCAyLjgzNDk2QzUxMS40ODQgMi44MzQ5NiA0NzguNDU2IDQwLjE2ODIgNDc4LjQ1NiA4Ni4xNzEzVjE3My45MzFDNDc4LjQ1NiAxODAuNDc4IDQ4My43NTUgMTg1Ljc4NiA0ODkuOTM2IDE4NS43ODZINTAwLjM1N0M1MDYuNTM4IDE4NS43ODYgNTExLjgzNyAxODAuMzAxIDUxMS44MzcgMTczLjkzMVY4MS4zOTQxQzUxMS44MzcgNTYuNjIzMiA1MzEuNDQxIDM2LjA5ODcgNTU1LjI4NSAzNi4wOTg3SDU1Ni4zNDRINTU3LjQwNEM1ODEuMjQ3IDM2LjA5ODcgNjAwLjg1MiA1Ni40NDYzIDYwMC44NTIgODEuMzk0MVYxNzMuOTMxQzYwMC44NTIgMTgwLjQ3OCA2MDYuMTUgMTg1Ljc4NiA2MTIuMzMyIDE4NS43ODZINjIyLjc1MkM2MjguOTM0IDE4NS43ODYgNjM0LjIzMiAxODAuMzAxIDYzNC4yMzIgMTczLjkzMVY4Ni4xNzEzQzYzMy44NzkgNDAuNjk5IDYwMC44NTIgMi44MzQ5NiA1NTYuMTY4IDIuODM0OTZaIiBmaWxsPSJ3aGl0ZSIvPgo8cGF0aCBkPSJNNDU2LjU1NCA4NS40NjM2VjE0LjE1ODhDNDU2LjU1NCA4LjE0MzAxIDQ1MS4yNTYgMi44MzQ5NiA0NDQuODk4IDIuODM0OTZINDM0LjMwMUM0MjcuOTQyIDIuODM0OTYgNDIyLjY0NCA3Ljk2NjA3IDQyMi42NDQgMTQuMTU4OFYxMTkuNjEyVjE3NC44MTZDNDIyLjY0NCAxODAuODMyIDQyNy45NDIgMTg2LjE0IDQzNC4zMDEgMTg2LjE0SDQ0NC44OThDNDUxLjI1NiAxODYuMTQgNDU2LjU1NCAxODEuMDA4IDQ1Ni41NTQgMTc0LjgxNlY4NS40NjM2WiIgZmlsbD0id2hpdGUiLz4KPHBhdGggZD0iTTgwOC41NTEgMTQxLjJMODAxLjEzMyAxMzMuNzY5Qzc5Ni43MTggMTI5LjM0NiA3ODkuMyAxMjkuMTY5IDc4NS4wNjEgMTMzLjQxNUM3ODUuMDYxIDEzMy40MTUgNzgzLjgyNSAxMzQuNjU0IDc4MS4zNTIgMTM3LjEzMUM3NzEuMjg1IDE0Ni42ODUgNzU4LjIxNiAxNTEuOTkzIDc0NC42MTYgMTUxLjk5M0M3MTQuNDE1IDE1MS45OTMgNjg5LjY4OCAxMjYuMzM4IDY4OS42ODggOTQuNjY2NEM2ODkuNjg4IDYyLjk5NTEgNzE0LjIzOCAzNy4zMzk1IDc0NC42MTYgMzcuMzM5NUM3NTguMjE2IDM3LjMzOTUgNzcxLjI4NSA0Mi40NzA2IDc4MS4zNTIgNTIuMDI1MUw3ODQuNTMxIDU1LjIwOTlDNzg4Ljc3IDU5LjQ1NjQgNzk2LjE4OCA1OS40NTY0IDgwMC42MDQgNTQuODU2MUw4MDguMDIxIDQ3LjQyNDhDODEyLjQzNyA0My4wMDE0IDgxMi42MTQgMzUuNTcwMiA4MDguMzc1IDMxLjMyMzdMODAzLjI1MyAyNi4zNjk1Qzc4Ny4wMDQgMTEuNjgzOSA3NjYuMzQgMy41NDQ5MiA3NDQuNjE2IDMuNTQ0OTJDNjk1LjY5MyAzLjU0NDkyIDY1NS45NTUgNDQuNDE2OSA2NTUuOTU1IDk0Ljg0MzRDNjU1Ljk1NSAxNDUuMjcgNjk1LjY5MyAxODYuMTQyIDc0NC42MTYgMTg2LjE0MkM3NjYuNTE3IDE4Ni4xNDIgNzg3LjUzNCAxNzcuODI2IDgwMy45NTkgMTYyLjc4Nkw4MDkuMDgxIDE1Ny44MzJDODEzLjE0MyAxNTMuMDU1IDgxMi45NjcgMTQ1LjYyNCA4MDguNTUxIDE0MS4yWiIgZmlsbD0id2hpdGUiLz4KPHBhdGggZD0iTTE2MS42MDQgMTg1LjQyOEgxNDguNzExQzE0MC45NCAxODUuNDI4IDEzNC41ODIgMTc5LjA1OCAxMzQuNTgyIDE3MS4yNzNWODEuNTY2OUMxMzQuNTgyIDczLjc4MTggMTQwLjk0IDY3LjQxMjEgMTQ4LjcxMSA2Ny40MTIxSDE2MS43ODFDMTY5LjU1MiA2Ny40MTIxIDE3NS45MSA3My43ODE4IDE3NS45MSA4MS41NjY5VjE3MS4yNzNDMTc1LjczNCAxNzkuMDU4IDE2OS4zNzUgMTg1LjQyOCAxNjEuNjA0IDE4NS40MjhaIiBmaWxsPSJ3aGl0ZSIvPgo8cGF0aCBkPSJNOTYuNDMyNCAxODUuNDI4SDgzLjM2MjdDNzUuNTkxNiAxODUuNDI4IDY5LjIzMzQgMTc5LjA1OSA2OS4yMzM0IDE3MS4yNzRWMTIwLjg0N0M2OS4yMzM0IDExMy4wNjIgNzUuNTkxNiAxMDYuNjkyIDgzLjM2MjcgMTA2LjY5Mkg5Ni40MzI0QzEwNC4yMDMgMTA2LjY5MiAxMTAuNTYyIDExMy4wNjIgMTEwLjU2MiAxMjAuODQ3VjE3MS4yNzRDMTEwLjU2MiAxNzkuMDU5IDEwNC4yMDMgMTg1LjQyOCA5Ni40MzI0IDE4NS40MjhaIiBmaWxsPSJ3aGl0ZSIvPgo8cGF0aCBkPSJNMzAuOTA3NCAxODUuNDI2SDE4LjAxNDNDMTAuMjQzMiAxODUuNDI2IDMuODg1MDEgMTc5LjA1NyAzLjg4NTAxIDE3MS4yNzFWMTU4LjE3OEMzLjg4NTAxIDE1MC4zOTMgMTAuMjQzMiAxNDQuMDIzIDE4LjAxNDMgMTQ0LjAyM0gzMS4wODRDMzguODU1MSAxNDQuMDIzIDQ1LjIxMzMgMTUwLjM5MyA0NS4yMTMzIDE1OC4xNzhWMTcxLjI3MUM0NS4yMTMzIDE3OS4wNTcgMzguODU1MSAxODUuNDI2IDMwLjkwNzQgMTg1LjQyNloiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik0zMC43MzEzIDEyNS4wOTNIMTcuNjYxN0M3Ljk0Nzc1IDEyNS4wOTMgMCAxMTcuMTMxIDAgMTA3LjRWMTcuNjkzNUMwIDcuOTYyMDcgNy45NDc3NSAwIDE3LjY2MTcgMEgzMC43MzEzQzQwLjQ0NTIgMCA0OC4zOTI5IDcuOTYyMDcgNDguMzkyOSAxNy42OTM1VjEwNy40QzQ4LjU2OTYgMTE3LjEzMSA0MC42MjE4IDEyNS4wOTMgMzAuNzMxMyAxMjUuMDkzWk0xNy44MzgzIDYuOTAwNDdDMTIuMDA5OSA2LjkwMDQ3IDcuMjQxMjggMTEuNjc3NyA3LjI0MTI4IDE3LjUxNjZWMTA3LjIyM0M3LjI0MTI4IDExMy4wNjEgMTIuMDA5OSAxMTcuODM5IDE3LjgzODMgMTE3LjgzOUgzMC45MDc5QzM2LjczNjMgMTE3LjgzOSA0MS41MDQ5IDExMy4wNjEgNDEuNTA0OSAxMDcuMjIzVjE3LjY5MzVDNDEuNTA0OSAxMS44NTQ2IDM2LjczNjMgNy4wNzc0IDMwLjkwNzkgNy4wNzc0SDE3LjgzODNWNi45MDA0N1pNOTYuMDc5NCA4NS44MTM1SDgzLjE4NjRDNzMuNDcyNSA4NS44MTM1IDY1LjUyNDggNzcuODUxNCA2NS41MjQ4IDY4LjEyVjE3LjY5MzVDNjUuNzAxNCA3Ljc4NTE0IDczLjY0OTEgMCA4My4xODY0IDBIOTYuMDc5NEMxMDUuNzkzIDAgMTEzLjc0MSA3Ljk2MjA3IDExMy43NDEgMTcuNjkzNVY2OC4xMkMxMTMuNzQxIDc3Ljg1MTQgMTA1Ljc5MyA4NS44MTM1IDk2LjA3OTQgODUuODEzNVpNODMuMDA5OCA2LjkwMDQ3Qzc3LjE4MTUgNi45MDA0NyA3Mi40MTI4IDExLjY3NzcgNzIuNDEyOCAxNy42OTM1VjY3Ljk0M0M3Mi40MTI4IDczLjc4MTkgNzcuMTgxNSA3OC41NTkxIDgzLjAwOTggNzguNTU5MUg5NS45MDI4QzEwMS43MzEgNzguNTU5MSAxMDYuNSA3My43ODE5IDEwNi41IDY3Ljk0M1YxNy42OTM1QzEwNi41IDExLjg1NDYgMTAxLjczMSA3LjA3NzQgOTUuOTAyOCA3LjA3NzRIODMuMDA5OFY2LjkwMDQ3Wk0xNjEuNDI4IDQ4LjQ4MDJIMTQ4LjUzNUMxMzguODIxIDQ4LjQ4MDIgMTMwLjg3MyA0MC41MTgxIDEzMC44NzMgMzAuNzg2N1YxNy42OTM1QzEzMC44NzMgNy45NjIwNyAxMzguODIxIDAgMTQ4LjUzNSAwSDE2MS40MjhDMTcxLjE0MSAwIDE3OS4wODkgNy45NjIwNyAxNzkuMDg5IDE3LjY5MzVWMzAuNzg2N0MxNzkuMDg5IDQwLjUxODEgMTcxLjE0MSA0OC40ODAyIDE2MS40MjggNDguNDgwMlpNMTQ4LjUzNSA2LjkwMDQ3QzE0Mi43MDYgNi45MDA0NyAxMzcuOTM4IDExLjY3NzcgMTM3LjkzOCAxNy41MTY2VjMwLjYwOTdDMTM3LjkzOCAzNi40NDg2IDE0Mi43MDYgNDEuMjI1OCAxNDguNTM1IDQxLjIyNThIMTYxLjQyOEMxNjcuMjU2IDQxLjIyNTggMTcyLjAyNSAzNi40NDg2IDE3Mi4wMjUgMzAuNjA5N1YxNy41MTY2QzE3Mi4wMjUgMTEuNjc3NyAxNjcuMjU2IDYuOTAwNDcgMTYxLjQyOCA2LjkwMDQ3SDE0OC41MzVWNi45MDA0N1oiIGZpbGw9IndoaXRlIi8+Cjwvc3ZnPgo=" alt="CINC"></div>
+            <div class="header-text">
+                <h1>Sales Performance Dashboard — 2025</h1>
+                <p>Full Year Baseline · Reference data for year-over-year comparison</p>
+            </div>
+            <div class="header-badge">2025 Full Year</div>
+        </div>
+        <div class="controls">
+            <div class="controls-group">
+                <label for="sortBy2025">Sort By:</label>
+                <select id="sortBy2025" onchange="renderDashboard('2025')">
+                    <option value="Avg_ACV">Average ACV (Default)</option>
+                    <option value="Total_Revenue">Total Revenue</option>
+                    <option value="Total_Units">Total Units Sold</option>
+                    <option value="Avg_MRR">Average MRR</option>
+                    <option value="Avg_Setup_Fee">Average Setup Fee</option>
+                    <option value="Solo">Solo Units</option>
+                    <option value="Ramp">Ramp Units</option>
+                    <option value="Pro">Pro Units</option>
+                    <option value="Select">Select Units</option>
+                    <option value="Prime">Prime Units</option>
+                </select>
+            </div>
+        </div>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th><th>Sales Rep</th><th>Role</th><th>Units</th>
+                        <th>Solo</th><th>Ramp</th><th>Pro</th><th>Select</th><th>Prime</th>
+                        <th>Avg ACV</th><th>Avg MRR</th><th>Avg Setup</th><th>Total Revenue</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody2025"></tbody>
+            </table>
+        </div>
+        <div class="stats-footer">
+            <div class="stat-box"><div class="stat-label">Total Units Sold</div><div class="stat-value" id="totalUnits2025">—</div></div>
+            <div class="stat-box"><div class="stat-label">Avg Setup Fee</div><div class="stat-value" id="avgSetupFee2025">—</div></div>
+            <div class="stat-box"><div class="stat-label">Team Avg ACV</div><div class="stat-value" id="avgACV2025">—</div></div>
+            <div class="stat-box"><div class="stat-label">Team Avg MRR</div><div class="stat-value" id="avgMRR2025">—</div></div>
+            <div class="stat-box"><div class="stat-label">Total Revenue</div><div class="stat-value" id="totalRevenue2025">—</div></div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    const datasets = {
+        '2025': [
+            {"Sales_Rep_Name":"Austin Owen","Total_Units":128,"Total_Revenue":1677993.5,"Avg_ACV":13109.32,"Avg_MRR":1092.44,"Avg_Setup_Fee":121.34,"Role":"NAE","Solo":65,"Ramp":44,"Pro":16,"Select":3,"Prime":0},
+            {"Sales_Rep_Name":"Chuck Crosby","Total_Units":129,"Total_Revenue":1756873.0,"Avg_ACV":13619.17,"Avg_MRR":1134.93,"Avg_Setup_Fee":299.79,"Role":"NAE","Solo":38,"Ramp":73,"Pro":9,"Select":8,"Prime":1},
+            {"Sales_Rep_Name":"Dave McGinley","Total_Units":20,"Total_Revenue":240461.0,"Avg_ACV":12023.05,"Avg_MRR":1001.92,"Avg_Setup_Fee":124.2,"Role":"NAE","Solo":16,"Ramp":3,"Pro":1,"Select":0,"Prime":0},
+            {"Sales_Rep_Name":"Evan Burns","Total_Units":39,"Total_Revenue":518574.0,"Avg_ACV":13296.77,"Avg_MRR":1108.06,"Avg_Setup_Fee":73.62,"Role":"NAE","Solo":17,"Ramp":12,"Pro":8,"Select":2,"Prime":0},
+            {"Sales_Rep_Name":"Gordon Black","Total_Units":118,"Total_Revenue":1462296.0,"Avg_ACV":12392.34,"Avg_MRR":1032.69,"Avg_Setup_Fee":152.5,"Role":"SAE","Solo":69,"Ramp":25,"Pro":14,"Select":9,"Prime":1},
+            {"Sales_Rep_Name":"Just Frierson","Total_Units":172,"Total_Revenue":2164213.0,"Avg_ACV":12582.63,"Avg_MRR":1048.55,"Avg_Setup_Fee":158.59,"Role":"NAE","Solo":102,"Ramp":40,"Pro":13,"Select":10,"Prime":7},
+            {"Sales_Rep_Name":"Kevin Hoehn","Total_Units":146,"Total_Revenue":1936976.0,"Avg_ACV":13266.96,"Avg_MRR":1105.58,"Avg_Setup_Fee":210.4,"Role":"NAE","Solo":85,"Ramp":48,"Pro":9,"Select":3,"Prime":1},
+            {"Sales_Rep_Name":"Krissy Stafford","Total_Units":12,"Total_Revenue":130541.0,"Avg_ACV":10878.42,"Avg_MRR":906.53,"Avg_Setup_Fee":133.0,"Role":"NAE","Solo":10,"Ramp":2,"Pro":0,"Select":0,"Prime":0},
+            {"Sales_Rep_Name":"Mitch Baldwin","Total_Units":137,"Total_Revenue":1851682.5,"Avg_ACV":13515.93,"Avg_MRR":1126.33,"Avg_Setup_Fee":211.59,"Role":"SAE","Solo":65,"Ramp":55,"Pro":9,"Select":5,"Prime":3},
+            {"Sales_Rep_Name":"Nathaniel McCormick","Total_Units":39,"Total_Revenue":464344.0,"Avg_ACV":11906.26,"Avg_MRR":992.19,"Avg_Setup_Fee":131.23,"Role":"AE","Solo":30,"Ramp":9,"Pro":0,"Select":0,"Prime":0},
+            {"Sales_Rep_Name":"Ross Wheeler","Total_Units":124,"Total_Revenue":1693070.5,"Avg_ACV":13653.79,"Avg_MRR":1137.82,"Avg_Setup_Fee":247.65,"Role":"NAE","Solo":62,"Ramp":49,"Pro":6,"Select":4,"Prime":3},
+            {"Sales_Rep_Name":"Stephen Kessler","Total_Units":136,"Total_Revenue":1912250.0,"Avg_ACV":14060.66,"Avg_MRR":1171.72,"Avg_Setup_Fee":151.07,"Role":"NAE","Solo":48,"Ramp":75,"Pro":8,"Select":4,"Prime":1},
+            {"Sales_Rep_Name":"Suzanne McLean","Total_Units":128,"Total_Revenue":1887971.5,"Avg_ACV":14749.78,"Avg_MRR":1229.15,"Avg_Setup_Fee":200.69,"Role":"NAE","Solo":41,"Ramp":48,"Pro":10,"Select":7,"Prime":22},
+            {"Sales_Rep_Name":"Trey Carrion","Total_Units":75,"Total_Revenue":938964.5,"Avg_ACV":12519.53,"Avg_MRR":1043.29,"Avg_Setup_Fee":11.25,"Role":"NAE","Solo":34,"Ramp":32,"Pro":8,"Select":1,"Prime":0},
+            {"Sales_Rep_Name":"Tricia Sandberg","Total_Units":172,"Total_Revenue":2416084.0,"Avg_ACV":14047.0,"Avg_MRR":1170.58,"Avg_Setup_Fee":187.88,"Role":"NAE","Solo":85,"Ramp":65,"Pro":19,"Select":2,"Prime":1}
+        ],
+    };
+
+    const datasets2026 = {
+        '2026_Jan': [
+            {"Sales_Rep_Name":"Austin Owen","Total_Units":6,"Total_Revenue":72390.0,"Avg_ACV":12065.0,"Avg_MRR":1005.42,"Avg_Setup_Fee":116.0,"Role":"NAE","Solo":4,"Ramp":1,"Pro":1,"Select":0,"Prime":0},
+            {"Sales_Rep_Name":"Chuck Crosby","Total_Units":9,"Total_Revenue":109356.0,"Avg_ACV":12150.67,"Avg_MRR":1012.56,"Avg_Setup_Fee":155.0,"Role":"NAE","Solo":3,"Ramp":1,"Pro":4,"Select":1,"Prime":0},
+            {"Sales_Rep_Name":"Dave McGinley","Total_Units":2,"Total_Revenue":25776.0,"Avg_ACV":12888.0,"Avg_MRR":1074.0,"Avg_Setup_Fee":99.0,"Role":"NAE","Solo":1,"Ramp":1,"Pro":0,"Select":0,"Prime":0},
+            {"Sales_Rep_Name":"Gordon Black","Total_Units":14,"Total_Revenue":165436.0,"Avg_ACV":11816.86,"Avg_MRR":984.74,"Avg_Setup_Fee":127.93,"Role":"SAE","Solo":10,"Ramp":4,"Pro":0,"Select":0,"Prime":0},
+            {"Sales_Rep_Name":"Just Frierson","Total_Units":14,"Total_Revenue":172556.0,"Avg_ACV":12325.43,"Avg_MRR":1027.12,"Avg_Setup_Fee":170.43,"Role":"NAE","Solo":9,"Ramp":1,"Pro":2,"Select":0,"Prime":2},
+            {"Sales_Rep_Name":"Kevin Hoehn","Total_Units":11,"Total_Revenue":150568.0,"Avg_ACV":13688.0,"Avg_MRR":1140.67,"Avg_Setup_Fee":195.09,"Role":"NAE","Solo":5,"Ramp":5,"Pro":1,"Select":0,"Prime":0},
+            {"Sales_Rep_Name":"Krissy Stafford","Total_Units":4,"Total_Revenue":47252.0,"Avg_ACV":11813.0,"Avg_MRR":984.42,"Avg_Setup_Fee":0.0,"Role":"AE","Solo":3,"Ramp":1,"Pro":0,"Select":0,"Prime":0},
+            {"Sales_Rep_Name":"Mitch Baldwin","Total_Units":9,"Total_Revenue":115941.0,"Avg_ACV":12882.33,"Avg_MRR":1073.53,"Avg_Setup_Fee":210.11,"Role":"SAE","Solo":5,"Ramp":3,"Pro":0,"Select":0,"Prime":1},
+            {"Sales_Rep_Name":"Nathaniel McCormick","Total_Units":11,"Total_Revenue":152083.0,"Avg_ACV":13825.73,"Avg_MRR":1152.14,"Avg_Setup_Fee":217.18,"Role":"AE","Solo":5,"Ramp":4,"Pro":1,"Select":0,"Prime":1},
+            {"Sales_Rep_Name":"Ross Wheeler","Total_Units":10,"Total_Revenue":132892.0,"Avg_ACV":13289.2,"Avg_MRR":1107.43,"Avg_Setup_Fee":164.1,"Role":"NAE","Solo":4,"Ramp":6,"Pro":0,"Select":0,"Prime":0},
+            {"Sales_Rep_Name":"Stephen Kessler","Total_Units":6,"Total_Revenue":64136.0,"Avg_ACV":10689.33,"Avg_MRR":890.78,"Avg_Setup_Fee":107.67,"Role":"NAE","Solo":5,"Ramp":0,"Pro":1,"Select":0,"Prime":0},
+            {"Sales_Rep_Name":"Suzanne McLean","Total_Units":15,"Total_Revenue":191853.0,"Avg_ACV":12790.2,"Avg_MRR":1065.85,"Avg_Setup_Fee":136.4,"Role":"NAE","Solo":8,"Ramp":4,"Pro":1,"Select":0,"Prime":2},
+            {"Sales_Rep_Name":"Trey Carrion","Total_Units":9,"Total_Revenue":116104.0,"Avg_ACV":12900.44,"Avg_MRR":1075.04,"Avg_Setup_Fee":27.78,"Role":"NAE","Solo":3,"Ramp":6,"Pro":0,"Select":0,"Prime":0},
+            {"Sales_Rep_Name":"Tricia Sandberg","Total_Units":11,"Total_Revenue":161068.0,"Avg_ACV":14642.55,"Avg_MRR":1220.21,"Avg_Setup_Fee":135.64,"Role":"NAE","Solo":3,"Ramp":8,"Pro":0,"Select":0,"Prime":0}
+        ],
+        '2026_Feb': [
+            {"Sales_Rep_Name":"Austin Owen","Total_Units":14,"Total_Revenue":185132.0,"Avg_ACV":13223.71,"Avg_MRR":1101.98,"Avg_Setup_Fee":110.29,"Role":"NAE","Solo":8,"Ramp":5,"Pro":1,"Select":0,"Prime":0},
+            {"Sales_Rep_Name":"Chuck Crosby","Total_Units":7,"Total_Revenue":100231.0,"Avg_ACV":14318.71,"Avg_MRR":1193.23,"Avg_Setup_Fee":113.86,"Role":"NAE","Solo":3,"Ramp":3,"Pro":0,"Select":0,"Prime":1},
+            {"Sales_Rep_Name":"Dave McGinley","Total_Units":5,"Total_Revenue":54742.0,"Avg_ACV":10948.4,"Avg_MRR":912.37,"Avg_Setup_Fee":159.0,"Role":"NAE","Solo":4,"Ramp":1,"Pro":0,"Select":0,"Prime":0},
+            {"Sales_Rep_Name":"Just Frierson","Total_Units":5,"Total_Revenue":47840.0,"Avg_ACV":9568.0,"Avg_MRR":797.33,"Avg_Setup_Fee":249.2,"Role":"NAE","Solo":3,"Ramp":0,"Pro":0,"Select":2,"Prime":0},
+            {"Sales_Rep_Name":"Kevin Hoehn","Total_Units":8,"Total_Revenue":111904.0,"Avg_ACV":13988.0,"Avg_MRR":1165.67,"Avg_Setup_Fee":187.5,"Role":"NAE","Solo":4,"Ramp":3,"Pro":1,"Select":0,"Prime":0},
+            {"Sales_Rep_Name":"Krissy Stafford","Total_Units":5,"Total_Revenue":58146.0,"Avg_ACV":11629.2,"Avg_MRR":969.1,"Avg_Setup_Fee":99.8,"Role":"AE","Solo":4,"Ramp":0,"Pro":1,"Select":0,"Prime":0},
+            {"Sales_Rep_Name":"Mitch Baldwin","Total_Units":10,"Total_Revenue":134732.0,"Avg_ACV":13473.2,"Avg_MRR":1122.77,"Avg_Setup_Fee":214.0,"Role":"SAE","Solo":5,"Ramp":5,"Pro":0,"Select":0,"Prime":0},
+            {"Sales_Rep_Name":"Nathaniel McCormick","Total_Units":11,"Total_Revenue":139168.0,"Avg_ACV":12651.64,"Avg_MRR":1054.3,"Avg_Setup_Fee":130.91,"Role":"AE","Solo":8,"Ramp":2,"Pro":1,"Select":0,"Prime":0},
+            {"Sales_Rep_Name":"Ross Wheeler","Total_Units":7,"Total_Revenue":102632.0,"Avg_ACV":14661.71,"Avg_MRR":1221.81,"Avg_Setup_Fee":220.57,"Role":"NAE","Solo":1,"Ramp":4,"Pro":1,"Select":0,"Prime":1},
+            {"Sales_Rep_Name":"Stephen Kessler","Total_Units":12,"Total_Revenue":175260.0,"Avg_ACV":14605.0,"Avg_MRR":1217.08,"Avg_Setup_Fee":212.08,"Role":"NAE","Solo":4,"Ramp":8,"Pro":0,"Select":0,"Prime":0},
+            {"Sales_Rep_Name":"Suzanne McLean","Total_Units":11,"Total_Revenue":156886.0,"Avg_ACV":14262.36,"Avg_MRR":1188.53,"Avg_Setup_Fee":199.73,"Role":"NAE","Solo":3,"Ramp":5,"Pro":2,"Select":0,"Prime":1},
+            {"Sales_Rep_Name":"Trey Carrion","Total_Units":5,"Total_Revenue":61441.5,"Avg_ACV":12288.3,"Avg_MRR":1024.02,"Avg_Setup_Fee":0.0,"Role":"NAE","Solo":3,"Ramp":2,"Pro":0,"Select":0,"Prime":0},
+            {"Sales_Rep_Name":"Tricia Sandberg","Total_Units":10,"Total_Revenue":143480.0,"Avg_ACV":14348.0,"Avg_MRR":1195.67,"Avg_Setup_Fee":94.6,"Role":"NAE","Solo":5,"Ramp":3,"Pro":2,"Select":0,"Prime":0}
+        ],
+        '2026_Mar': [
+            {"Sales_Rep_Name":"Austin Owen","Total_Units":14,"Total_Revenue":155933.0,"Avg_ACV":11138.07,"Avg_MRR":928.17,"Avg_Setup_Fee":103.29,"Role":"NAE","Solo":13,"Ramp":1,"Pro":0,"Select":0,"Prime":0},
+            {"Sales_Rep_Name":"Chuck Crosby","Total_Units":6,"Total_Revenue":69133.0,"Avg_ACV":11522.17,"Avg_MRR":960.18,"Avg_Setup_Fee":16.5,"Role":"NAE","Solo":5,"Ramp":1,"Pro":0,"Select":0,"Prime":0},
+            {"Sales_Rep_Name":"Dave McGinley","Total_Units":7,"Total_Revenue":96118.0,"Avg_ACV":13731.14,"Avg_MRR":1144.26,"Avg_Setup_Fee":113.86,"Role":"NAE","Solo":3,"Ramp":4,"Pro":0,"Select":0,"Prime":0},
+            {"Sales_Rep_Name":"Just Frierson","Total_Units":12,"Total_Revenue":167304.0,"Avg_ACV":13942.0,"Avg_MRR":1161.83,"Avg_Setup_Fee":204.08,"Role":"NAE","Solo":5,"Ramp":2,"Pro":1,"Select":0,"Prime":4},
+            {"Sales_Rep_Name":"Krissy Stafford","Total_Units":9,"Total_Revenue":93101.0,"Avg_ACV":10344.56,"Avg_MRR":862.05,"Avg_Setup_Fee":55.56,"Role":"AE","Solo":6,"Ramp":0,"Pro":1,"Select":2,"Prime":0},
+            {"Sales_Rep_Name":"Mitch Baldwin","Total_Units":17,"Total_Revenue":214313.0,"Avg_ACV":12606.65,"Avg_MRR":1050.55,"Avg_Setup_Fee":193.18,"Role":"SAE","Solo":9,"Ramp":4,"Pro":0,"Select":3,"Prime":1},
+            {"Sales_Rep_Name":"Nathaniel McCormick","Total_Units":11,"Total_Revenue":126880.0,"Avg_ACV":11534.55,"Avg_MRR":961.21,"Avg_Setup_Fee":113.0,"Role":"AE","Solo":10,"Ramp":0,"Pro":0,"Select":0,"Prime":1},
+            {"Sales_Rep_Name":"Ross Wheeler","Total_Units":12,"Total_Revenue":148969.0,"Avg_ACV":12414.08,"Avg_MRR":1034.51,"Avg_Setup_Fee":137.0,"Role":"NAE","Solo":7,"Ramp":3,"Pro":1,"Select":1,"Prime":0},
+            {"Sales_Rep_Name":"Stephen Kessler","Total_Units":15,"Total_Revenue":221439.0,"Avg_ACV":14762.6,"Avg_MRR":1230.22,"Avg_Setup_Fee":39.93,"Role":"NAE","Solo":2,"Ramp":10,"Pro":1,"Select":2,"Prime":0},
+            {"Sales_Rep_Name":"Suzanne McLean","Total_Units":21,"Total_Revenue":292590.0,"Avg_ACV":13932.86,"Avg_MRR":1161.07,"Avg_Setup_Fee":47.62,"Role":"NAE","Solo":10,"Ramp":5,"Pro":2,"Select":1,"Prime":3},
+            {"Sales_Rep_Name":"Trey Carrion","Total_Units":6,"Total_Revenue":70929.5,"Avg_ACV":11821.58,"Avg_MRR":985.13,"Avg_Setup_Fee":0.0,"Role":"NAE","Solo":4,"Ramp":2,"Pro":0,"Select":0,"Prime":0},
+            {"Sales_Rep_Name":"Tricia Sandberg","Total_Units":16,"Total_Revenue":203410.0,"Avg_ACV":12713.12,"Avg_MRR":1059.43,"Avg_Setup_Fee":59.31,"Role":"NAE","Solo":9,"Ramp":3,"Pro":2,"Select":2,"Prime":0}
+        ],
+        '2026_Apr': [
+            {"Sales_Rep_Name":"Austin Owen","Total_Units":10,"Total_Revenue":112180.0,"Avg_ACV":11218.0,"Avg_MRR":934.83,"Avg_Setup_Fee":89.2,"Role":"NAE","Solo":9,"Ramp":1,"Pro":0,"Select":0,"Prime":0},
+            {"Sales_Rep_Name":"Chuck Crosby","Total_Units":8,"Total_Revenue":100218.0,"Avg_ACV":12527.25,"Avg_MRR":1043.94,"Avg_Setup_Fee":87.25,"Role":"NAE","Solo":5,"Ramp":2,"Pro":0,"Select":0,"Prime":1},
+            {"Sales_Rep_Name":"Dave McGinley","Total_Units":2,"Total_Revenue":22376.0,"Avg_ACV":11188.0,"Avg_MRR":932.33,"Avg_Setup_Fee":149.0,"Role":"NAE","Solo":2,"Ramp":0,"Pro":0,"Select":0,"Prime":0},
+            {"Sales_Rep_Name":"Gordon Black","Total_Units":0,"Total_Revenue":0,"Avg_ACV":0,"Avg_MRR":0,"Avg_Setup_Fee":0,"Role":"SAE","Solo":0,"Ramp":0,"Pro":0,"Select":0,"Prime":0},
+            {"Sales_Rep_Name":"Just Frierson","Total_Units":12,"Total_Revenue":151768.0,"Avg_ACV":12647.33,"Avg_MRR":1053.94,"Avg_Setup_Fee":195.08,"Role":"NAE","Solo":5,"Ramp":2,"Pro":1,"Select":3,"Prime":1},
+            {"Sales_Rep_Name":"Krissy Stafford","Total_Units":0,"Total_Revenue":0,"Avg_ACV":0,"Avg_MRR":0,"Avg_Setup_Fee":0,"Role":"AE","Solo":0,"Ramp":0,"Pro":0,"Select":0,"Prime":0},
+            {"Sales_Rep_Name":"Mitch Baldwin","Total_Units":11,"Total_Revenue":153280.0,"Avg_ACV":13934.55,"Avg_MRR":1161.21,"Avg_Setup_Fee":167.36,"Role":"SAE","Solo":4,"Ramp":2,"Pro":4,"Select":1,"Prime":0},
+            {"Sales_Rep_Name":"Nathaniel McCormick","Total_Units":8,"Total_Revenue":95416.0,"Avg_ACV":11927.0,"Avg_MRR":993.92,"Avg_Setup_Fee":143.0,"Role":"AE","Solo":6,"Ramp":2,"Pro":0,"Select":0,"Prime":0},
+            {"Sales_Rep_Name":"Ross Wheeler","Total_Units":11,"Total_Revenue":186392.0,"Avg_ACV":16944.73,"Avg_MRR":1412.06,"Avg_Setup_Fee":190.55,"Role":"NAE","Solo":3,"Ramp":3,"Pro":3,"Select":0,"Prime":2},
+            {"Sales_Rep_Name":"Stephen Kessler","Total_Units":4,"Total_Revenue":51755.0,"Avg_ACV":12938.75,"Avg_MRR":1078.23,"Avg_Setup_Fee":136.75,"Role":"NAE","Solo":2,"Ramp":2,"Pro":0,"Select":0,"Prime":0},
+            {"Sales_Rep_Name":"Suzanne McLean","Total_Units":8,"Total_Revenue":121204.0,"Avg_ACV":15150.5,"Avg_MRR":1262.54,"Avg_Setup_Fee":355.75,"Role":"NAE","Solo":2,"Ramp":5,"Pro":1,"Select":0,"Prime":0},
+            {"Sales_Rep_Name":"Tricia Sandberg","Total_Units":3,"Total_Revenue":42164.0,"Avg_ACV":14054.67,"Avg_MRR":1171.22,"Avg_Setup_Fee":33.0,"Role":"NAE","Solo":2,"Ramp":0,"Pro":0,"Select":1,"Prime":0}
+        ],
+        '2026_May': [
+            {"Sales_Rep_Name":"Austin Owen","Total_Units":13,"Total_Revenue":158844.0,"Avg_ACV":12218.77,"Avg_MRR":1018.23,"Avg_Setup_Fee":89.46,"Role":"NAE","Solo":8,"Ramp":5,"Pro":0,"Select":0,"Prime":0},
+            {"Sales_Rep_Name":"Chuck Crosby","Total_Units":9,"Total_Revenue":112097.0,"Avg_ACV":12455.22,"Avg_MRR":1037.94,"Avg_Setup_Fee":199.56,"Role":"NAE","Solo":6,"Ramp":2,"Pro":1,"Select":0,"Prime":0},
+            {"Sales_Rep_Name":"Dave McGinley","Total_Units":5,"Total_Revenue":61540.0,"Avg_ACV":12308.0,"Avg_MRR":1025.67,"Avg_Setup_Fee":169.2,"Role":"NAE","Solo":3,"Ramp":2,"Pro":0,"Select":0,"Prime":0},
+            {"Sales_Rep_Name":"Gordon Black","Total_Units":5,"Total_Revenue":60440.0,"Avg_ACV":12088.0,"Avg_MRR":1007.33,"Avg_Setup_Fee":99.0,"Role":"NAE","Solo":4,"Ramp":0,"Pro":1,"Select":0,"Prime":0},
+            {"Sales_Rep_Name":"Just Frierson","Total_Units":12,"Total_Revenue":134568.0,"Avg_ACV":11214.0,"Avg_MRR":934.5,"Avg_Setup_Fee":240.75,"Role":"NAE","Solo":8,"Ramp":0,"Pro":1,"Select":2,"Prime":1},
+            {"Sales_Rep_Name":"Krissy Stafford","Total_Units":0,"Total_Revenue":0,"Avg_ACV":0,"Avg_MRR":0,"Avg_Setup_Fee":0,"Role":"AE","Solo":0,"Ramp":0,"Pro":0,"Select":0,"Prime":0},
+            {"Sales_Rep_Name":"Mitch Baldwin","Total_Units":9,"Total_Revenue":97992.0,"Avg_ACV":10888.0,"Avg_MRR":907.33,"Avg_Setup_Fee":204.56,"Role":"SAE","Solo":8,"Ramp":0,"Pro":0,"Select":1,"Prime":0},
+            {"Sales_Rep_Name":"Nathaniel McCormick","Total_Units":7,"Total_Revenue":79378.0,"Avg_ACV":11339.71,"Avg_MRR":944.98,"Avg_Setup_Fee":49.71,"Role":"AE","Solo":5,"Ramp":0,"Pro":2,"Select":0,"Prime":0},
+            {"Sales_Rep_Name":"Ross Wheeler","Total_Units":11,"Total_Revenue":174304.0,"Avg_ACV":15845.82,"Avg_MRR":1320.48,"Avg_Setup_Fee":158.45,"Role":"NAE","Solo":3,"Ramp":4,"Pro":1,"Select":2,"Prime":1},
+            {"Sales_Rep_Name":"Stephen Kessler","Total_Units":8,"Total_Revenue":101007.0,"Avg_ACV":12625.88,"Avg_MRR":1052.16,"Avg_Setup_Fee":106.12,"Role":"NAE","Solo":4,"Ramp":4,"Pro":0,"Select":0,"Prime":0},
+            {"Sales_Rep_Name":"Suzanne McLean","Total_Units":11,"Total_Revenue":150068.0,"Avg_ACV":13642.55,"Avg_MRR":1136.88,"Avg_Setup_Fee":295.27,"Role":"NAE","Solo":5,"Ramp":5,"Pro":1,"Select":0,"Prime":0},
+            {"Sales_Rep_Name":"Tricia Sandberg","Total_Units":0,"Total_Revenue":0,"Avg_ACV":0,"Avg_MRR":0,"Avg_Setup_Fee":0,"Role":"NAE","Solo":0,"Ramp":0,"Pro":0,"Select":0,"Prime":0}
+        ],
+        '2026_Jun': [
+            {"Sales_Rep_Name":"Austin Owen","Total_Units":8,"Total_Revenue":99204.0,"Avg_ACV":12400.50,"Avg_MRR":1033.38,"Avg_Setup_Fee":211.88,"Role":"NAE","Solo":6,"Ramp":2,"Pro":0,"Select":0,"Prime":0},
+            {"Sales_Rep_Name":"Chuck Crosby","Total_Units":0,"Total_Revenue":0,"Avg_ACV":0,"Avg_MRR":0,"Avg_Setup_Fee":0,"Role":"NAE","Solo":0,"Ramp":0,"Pro":0,"Select":0,"Prime":0},
+            {"Sales_Rep_Name":"Dave McGinley","Total_Units":4,"Total_Revenue":45552.0,"Avg_ACV":11388.0,"Avg_MRR":949.0,"Avg_Setup_Fee":199.50,"Role":"NAE","Solo":4,"Ramp":0,"Pro":0,"Select":0,"Prime":0},
+            {"Sales_Rep_Name":"Gordon Black","Total_Units":14,"Total_Revenue":167432.0,"Avg_ACV":11959.43,"Avg_MRR":996.62,"Avg_Setup_Fee":167.43,"Role":"NAE","Solo":11,"Ramp":3,"Pro":0,"Select":0,"Prime":0},
+            {"Sales_Rep_Name":"Just Frierson","Total_Units":9,"Total_Revenue":117692.0,"Avg_ACV":13076.89,"Avg_MRR":1089.74,"Avg_Setup_Fee":265.67,"Role":"NAE","Solo":6,"Ramp":3,"Pro":0,"Select":0,"Prime":0},
+            {"Sales_Rep_Name":"Kevin Hoehn","Total_Units":0,"Total_Revenue":0,"Avg_ACV":0,"Avg_MRR":0,"Avg_Setup_Fee":0,"Role":"NAE","Solo":0,"Ramp":0,"Pro":0,"Select":0,"Prime":0},
+            {"Sales_Rep_Name":"Krissy Stafford","Total_Units":3,"Total_Revenue":34164.0,"Avg_ACV":11388.0,"Avg_MRR":949.0,"Avg_Setup_Fee":250.0,"Role":"AE","Solo":3,"Ramp":0,"Pro":0,"Select":0,"Prime":0},
+            {"Sales_Rep_Name":"Mitch Baldwin","Total_Units":13,"Total_Revenue":162244.0,"Avg_ACV":12480.31,"Avg_MRR":1040.03,"Avg_Setup_Fee":187.54,"Role":"SAE","Solo":10,"Ramp":3,"Pro":0,"Select":0,"Prime":0},
+            {"Sales_Rep_Name":"Nathaniel McCormick","Total_Units":6,"Total_Revenue":78828.0,"Avg_ACV":13138.0,"Avg_MRR":1094.83,"Avg_Setup_Fee":165.67,"Role":"AE","Solo":4,"Ramp":1,"Pro":1,"Select":0,"Prime":0},
+            {"Sales_Rep_Name":"Ross Wheeler","Total_Units":9,"Total_Revenue":121895.0,"Avg_ACV":13543.89,"Avg_MRR":1128.66,"Avg_Setup_Fee":133.11,"Role":"NAE","Solo":5,"Ramp":2,"Pro":2,"Select":0,"Prime":0},
+            {"Sales_Rep_Name":"Stephen Kessler","Total_Units":15,"Total_Revenue":219720.0,"Avg_ACV":14648.0,"Avg_MRR":1220.67,"Avg_Setup_Fee":223.27,"Role":"NAE","Solo":5,"Ramp":9,"Pro":1,"Select":0,"Prime":0},
+            {"Sales_Rep_Name":"Suzanne McLean","Total_Units":13,"Total_Revenue":199868.0,"Avg_ACV":15374.46,"Avg_MRR":1281.20,"Avg_Setup_Fee":303.77,"Role":"NAE","Solo":1,"Ramp":9,"Pro":1,"Select":0,"Prime":2},
+            {"Sales_Rep_Name":"Trey Carrion","Total_Units":0,"Total_Revenue":0,"Avg_ACV":0,"Avg_MRR":0,"Avg_Setup_Fee":0,"Role":"NAE","Solo":0,"Ramp":0,"Pro":0,"Select":0,"Prime":0},
+            {"Sales_Rep_Name":"Tricia Sandberg","Total_Units":0,"Total_Revenue":0,"Avg_ACV":0,"Avg_MRR":0,"Avg_Setup_Fee":0,"Role":"NAE","Solo":0,"Ramp":0,"Pro":0,"Select":0,"Prime":0}
+        ],
+        '2026_Jul': [
+            {"Sales_Rep_Name":"Austin Owen","Total_Units":8,"Total_Revenue":103704.0,"Avg_ACV":12963.0,"Avg_MRR":1080.25,"Avg_Setup_Fee":162.0,"Role":"NAE","Solo":5,"Ramp":3,"Pro":0,"Select":0,"Prime":0},
+            {"Sales_Rep_Name":"Chuck Crosby","Total_Units":0,"Total_Revenue":0.0,"Avg_ACV":0,"Avg_MRR":0,"Avg_Setup_Fee":0,"Role":"NAE","Solo":0,"Ramp":0,"Pro":0,"Select":0,"Prime":0},
+            {"Sales_Rep_Name":"Dave McGinley","Total_Units":5,"Total_Revenue":61340.0,"Avg_ACV":12268.0,"Avg_MRR":1022.33,"Avg_Setup_Fee":99.0,"Role":"NAE","Solo":4,"Ramp":1,"Pro":0,"Select":0,"Prime":0},
+            {"Sales_Rep_Name":"Gordon Black","Total_Units":8,"Total_Revenue":106016.0,"Avg_ACV":13252.0,"Avg_MRR":1104.33,"Avg_Setup_Fee":143.25,"Role":"NAE","Solo":5,"Ramp":2,"Pro":0,"Select":0,"Prime":1},
+            {"Sales_Rep_Name":"Just Frierson","Total_Units":10,"Total_Revenue":115180.0,"Avg_ACV":11518.0,"Avg_MRR":959.83,"Avg_Setup_Fee":274.1,"Role":"NAE","Solo":8,"Ramp":1,"Pro":0,"Select":1,"Prime":0},
+            {"Sales_Rep_Name":"Kevin Hoehn","Total_Units":0,"Total_Revenue":0.0,"Avg_ACV":0,"Avg_MRR":0,"Avg_Setup_Fee":0,"Role":"NAE","Solo":0,"Ramp":0,"Pro":0,"Select":0,"Prime":0},
+            {"Sales_Rep_Name":"Krissy Stafford","Total_Units":7,"Total_Revenue":91316.0,"Avg_ACV":13045.14,"Avg_MRR":1087.1,"Avg_Setup_Fee":292.57,"Role":"AE","Solo":5,"Ramp":2,"Pro":0,"Select":0,"Prime":0},
+            {"Sales_Rep_Name":"Mitch Baldwin","Total_Units":10,"Total_Revenue":138680.0,"Avg_ACV":13868.0,"Avg_MRR":1155.67,"Avg_Setup_Fee":224.0,"Role":"SAE","Solo":4,"Ramp":4,"Pro":2,"Select":0,"Prime":0},
+            {"Sales_Rep_Name":"Nathaniel McCormick","Total_Units":5,"Total_Revenue":66840.0,"Avg_ACV":13368.0,"Avg_MRR":1114.0,"Avg_Setup_Fee":219.4,"Role":"AE","Solo":2,"Ramp":3,"Pro":0,"Select":0,"Prime":0},
+            {"Sales_Rep_Name":"Ross Wheeler","Total_Units":2,"Total_Revenue":35676.0,"Avg_ACV":17838.0,"Avg_MRR":1486.5,"Avg_Setup_Fee":250.0,"Role":"NAE","Solo":0,"Ramp":1,"Pro":1,"Select":0,"Prime":0},
+            {"Sales_Rep_Name":"Stephen Kessler","Total_Units":11,"Total_Revenue":153171.0,"Avg_ACV":13924.64,"Avg_MRR":1160.39,"Avg_Setup_Fee":159.09,"Role":"NAE","Solo":5,"Ramp":5,"Pro":1,"Select":0,"Prime":0},
+            {"Sales_Rep_Name":"Suzanne McLean","Total_Units":14,"Total_Revenue":216732.0,"Avg_ACV":15480.86,"Avg_MRR":1290.07,"Avg_Setup_Fee":296.29,"Role":"NAE","Solo":1,"Ramp":12,"Pro":1,"Select":0,"Prime":0},
+            {"Sales_Rep_Name":"Trey Carrion","Total_Units":0,"Total_Revenue":0.0,"Avg_ACV":0,"Avg_MRR":0,"Avg_Setup_Fee":0,"Role":"NAE","Solo":0,"Ramp":0,"Pro":0,"Select":0,"Prime":0},
+            {"Sales_Rep_Name":"Tricia Sandberg","Total_Units":1,"Total_Revenue":11388.0,"Avg_ACV":11388.0,"Avg_MRR":949.0,"Avg_Setup_Fee":250.0,"Role":"NAE","Solo":1,"Ramp":0,"Pro":0,"Select":0,"Prime":0}
+        ],
+        '2026_Aug': [
+            {"Sales_Rep_Name":"Austin Owen","Total_Units":13,"Total_Revenue":178444.0,"Avg_ACV":13726.46,"Avg_MRR":1143.87,"Avg_Setup_Fee":130.38,"Role":"NAE","Solo":5,"Ramp":8,"Pro":0,"Select":0,"Prime":0},
+            {"Sales_Rep_Name":"Chuck Crosby","Total_Units":0,"Total_Revenue":0.0,"Avg_ACV":0,"Avg_MRR":0,"Avg_Setup_Fee":0,"Role":"NAE","Solo":0,"Ramp":0,"Pro":0,"Select":0,"Prime":0},
+            {"Sales_Rep_Name":"Dave McGinley","Total_Units":9,"Total_Revenue":111092.0,"Avg_ACV":12343.56,"Avg_MRR":1028.63,"Avg_Setup_Fee":155.11,"Role":"NAE","Solo":5,"Ramp":4,"Pro":0,"Select":0,"Prime":0},
+            {"Sales_Rep_Name":"Gordon Black","Total_Units":14,"Total_Revenue":163844.0,"Avg_ACV":11703.14,"Avg_MRR":975.26,"Avg_Setup_Fee":110.14,"Role":"NAE","Solo":11,"Ramp":2,"Pro":0,"Select":0,"Prime":1},
+            {"Sales_Rep_Name":"Just Frierson","Total_Units":6,"Total_Revenue":71728.0,"Avg_ACV":11954.67,"Avg_MRR":996.22,"Avg_Setup_Fee":82.5,"Role":"NAE","Solo":5,"Ramp":1,"Pro":0,"Select":0,"Prime":0},
+            {"Sales_Rep_Name":"Kevin Hoehn","Total_Units":0,"Total_Revenue":0.0,"Avg_ACV":0,"Avg_MRR":0,"Avg_Setup_Fee":0,"Role":"NAE","Solo":0,"Ramp":0,"Pro":0,"Select":0,"Prime":0},
+            {"Sales_Rep_Name":"Krissy Stafford","Total_Units":7,"Total_Revenue":85619.0,"Avg_ACV":12231.29,"Avg_MRR":1019.27,"Avg_Setup_Fee":249.57,"Role":"AE","Solo":5,"Ramp":1,"Pro":1,"Select":0,"Prime":0},
+            {"Sales_Rep_Name":"Mitch Baldwin","Total_Units":8,"Total_Revenue":104104.0,"Avg_ACV":13013.0,"Avg_MRR":1084.42,"Avg_Setup_Fee":211.5,"Role":"SAE","Solo":4,"Ramp":2,"Pro":2,"Select":0,"Prime":0},
+            {"Sales_Rep_Name":"Nathaniel McCormick","Total_Units":10,"Total_Revenue":120180.0,"Avg_ACV":12018.0,"Avg_MRR":1001.5,"Avg_Setup_Fee":224.2,"Role":"AE","Solo":7,"Ramp":2,"Pro":0,"Select":1,"Prime":0},
+            {"Sales_Rep_Name":"Ross Wheeler","Total_Units":13,"Total_Revenue":183521.5,"Avg_ACV":14117.04,"Avg_MRR":1176.42,"Avg_Setup_Fee":230.77,"Role":"NAE","Solo":8,"Ramp":3,"Pro":0,"Select":0,"Prime":2},
+            {"Sales_Rep_Name":"Stephen Kessler","Total_Units":10,"Total_Revenue":147685.5,"Avg_ACV":14768.55,"Avg_MRR":1230.71,"Avg_Setup_Fee":179.7,"Role":"NAE","Solo":2,"Ramp":5,"Pro":2,"Select":1,"Prime":0},
+            {"Sales_Rep_Name":"Suzanne McLean","Total_Units":12,"Total_Revenue":160159.0,"Avg_ACV":13346.58,"Avg_MRR":1112.21,"Avg_Setup_Fee":158.0,"Role":"NAE","Solo":4,"Ramp":7,"Pro":1,"Select":0,"Prime":0},
+            {"Sales_Rep_Name":"Trey Carrion","Total_Units":0,"Total_Revenue":0.0,"Avg_ACV":0,"Avg_MRR":0,"Avg_Setup_Fee":0,"Role":"NAE","Solo":0,"Ramp":0,"Pro":0,"Select":0,"Prime":0},
+            {"Sales_Rep_Name":"Tricia Sandberg","Total_Units":13,"Total_Revenue":155056.0,"Avg_ACV":11927.38,"Avg_MRR":993.95,"Avg_Setup_Fee":111.38,"Role":"NAE","Solo":9,"Ramp":3,"Pro":0,"Select":0,"Prime":1}
+        ]
+    };
+
+    function fmt(v) { return '$' + v.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}); }
+
+    // ── Appointments data by rep and month ──────────────────────────────────
+    const apptData = {
+        'Austin Owen':        { '2026_Jan':47, '2026_Feb':46, '2026_Mar':68, '2026_Apr':73, '2026_May':56, '2026_Jun':55, '2026_Jul':49, '2026_Aug':56 },
+        'Chuck Crosby':       { '2026_Jan':43, '2026_Feb':48, '2026_Mar':63, '2026_Apr':71, '2026_May':50, '2026_Jun':0,  '2026_Jul':0,  '2026_Aug':0  },
+        'Dave McGinley':      { '2026_Jan':37, '2026_Feb':34, '2026_Mar':50, '2026_Apr':54, '2026_May':34, '2026_Jun':31, '2026_Jul':41, '2026_Aug':43 },
+        'Gordon Black':       { '2026_Jan':43, '2026_Feb':0,  '2026_Mar':0,  '2026_Apr':0,  '2026_May':52, '2026_Jun':54, '2026_Jul':52, '2026_Aug':51 },
+        'Just Frierson':      { '2026_Jan':51, '2026_Feb':50, '2026_Mar':74, '2026_Apr':79, '2026_May':53, '2026_Jun':64, '2026_Jul':64, '2026_Aug':56 },
+        'Kevin Hoehn':        { '2026_Jan':51, '2026_Feb':48, '2026_Mar':0,  '2026_Apr':0,  '2026_May':0,  '2026_Jun':0,  '2026_Jul':0,  '2026_Aug':0  },
+        'Krissy Stafford':    { '2026_Jan':0,  '2026_Feb':0,  '2026_Mar':0,  '2026_Apr':0,  '2026_May':0,  '2026_Jun':36, '2026_Jul':36, '2026_Aug':36 },
+        'Mitch Baldwin':      { '2026_Jan':35, '2026_Feb':40, '2026_Mar':54, '2026_Apr':67, '2026_May':51, '2026_Jun':52, '2026_Jul':46, '2026_Aug':43 },
+        'Nathaniel McCormick':{ '2026_Jan':32, '2026_Feb':33, '2026_Mar':48, '2026_Apr':49, '2026_May':42, '2026_Jun':45, '2026_Jul':22, '2026_Aug':35 },
+        'Ross Wheeler':       { '2026_Jan':52, '2026_Feb':48, '2026_Mar':71, '2026_Apr':78, '2026_May':53, '2026_Jun':49, '2026_Jul':39, '2026_Aug':53 },
+        'Stephen Kessler':    { '2026_Jan':50, '2026_Feb':48, '2026_Mar':73, '2026_Apr':61, '2026_May':65, '2026_Jun':59, '2026_Jul':50, '2026_Aug':55 },
+        'Suzanne McLean':     { '2026_Jan':47, '2026_Feb':45, '2026_Mar':69, '2026_Apr':61, '2026_May':50, '2026_Jun':45, '2026_Jul':50, '2026_Aug':53 },
+        'Trey Carrion':       { '2026_Jan':0,  '2026_Feb':0,  '2026_Mar':0,  '2026_Apr':0,  '2026_May':0,  '2026_Jun':0,  '2026_Jul':0,  '2026_Aug':0  },
+        'Tricia Sandberg':    { '2026_Jan':51, '2026_Feb':44, '2026_Mar':63, '2026_Apr':23, '2026_May':0,  '2026_Jun':0,  '2026_Jul':6,  '2026_Aug':48 },
+    };
+
+    function getAppts(repName, key) {
+        const repAppts = apptData[repName];
+        if (!repAppts) return 0;
+        if (cumulativePeriods[key]) {
+            return cumulativePeriods[key].reduce((sum, mk) => sum + (repAppts[mk] || 0), 0);
+        }
+        return repAppts[key] || 0;
+    }
+
+    const monthLabels = {
+        '2026_Jan': 'January 2026', '2026_Feb': 'February 2026', '2026_Mar': 'March 2026',
+        '2026_Apr': 'April 2026', '2026_May': 'May 2026', '2026_Jun': 'June 2026',
+        '2026_Jul': 'July 2026', '2026_Aug': 'August 2026',
+        '2026_Q1': 'Q1 2026 (Jan–Mar)', '2026_Q2': 'Q2 2026 (Apr–Jun)',
+        '2026_Q3': 'Q3 2026 (Jul–Aug)', '2026_H1': 'H1 2026 (Jan–Jun)',
+        '2026_YTD': 'YTD 2026 (Jan–Aug)'
+    };
+
+    const cumulativePeriods = {
+        '2026_Q1':  ['2026_Jan', '2026_Feb', '2026_Mar'],
+        '2026_Q2':  ['2026_Apr', '2026_May', '2026_Jun'],
+        '2026_Q3':  ['2026_Jul', '2026_Aug'],
+        '2026_H1':  ['2026_Jan', '2026_Feb', '2026_Mar', '2026_Apr', '2026_May', '2026_Jun'],
+        '2026_YTD': ['2026_Jan', '2026_Feb', '2026_Mar', '2026_Apr', '2026_May', '2026_Jun', '2026_Jul', '2026_Aug']
+    };
+
+    function buildCumulative(monthKeys) {
+        // Collect all rep names across all months
+        const allReps = {};
+        monthKeys.forEach(mk => {
+            (datasets2026[mk] || []).forEach(r => {
+                if (!allReps[r.Sales_Rep_Name]) {
+                    allReps[r.Sales_Rep_Name] = { Sales_Rep_Name: r.Sales_Rep_Name, Role: r.Role, Total_Units: 0, Total_Revenue: 0, Total_Setup_Sum: 0, Solo: 0, Ramp: 0, Pro: 0, Select: 0, Prime: 0, unit_count_for_avg: 0 };
+                }
+            });
+        });
+        // Sum across months
+        monthKeys.forEach(mk => {
+            (datasets2026[mk] || []).forEach(r => {
+                const rep = allReps[r.Sales_Rep_Name];
+                rep.Total_Units += r.Total_Units;
+                rep.Total_Revenue += r.Total_Revenue;
+                rep.Total_Setup_Sum += r.Avg_Setup_Fee * r.Total_Units;
+                rep.Solo += r.Solo; rep.Ramp += r.Ramp; rep.Pro += r.Pro;
+                rep.Select += r.Select; rep.Prime += r.Prime;
+            });
+        });
+        // Compute averages
+        return Object.values(allReps).map(r => ({
+            Sales_Rep_Name: r.Sales_Rep_Name,
+            Role: r.Role,
+            Total_Units: r.Total_Units,
+            Total_Revenue: Math.round(r.Total_Revenue * 10) / 10,
+            Avg_ACV: r.Total_Units > 0 ? Math.round((r.Total_Revenue / r.Total_Units) * 100) / 100 : 0,
+            Avg_MRR: r.Total_Units > 0 ? Math.round((r.Total_Revenue / r.Total_Units / 12) * 100) / 100 : 0,
+            Avg_Setup_Fee: r.Total_Units > 0 ? Math.round((r.Total_Setup_Sum / r.Total_Units) * 100) / 100 : 0,
+            Solo: r.Solo, Ramp: r.Ramp, Pro: r.Pro, Select: r.Select, Prime: r.Prime
+        }));
+    }
+
+    function get2026Data() {
+        const sel = document.getElementById('month2026');
+        const key = sel ? sel.value : '2026_Aug';
+        if (cumulativePeriods[key]) return buildCumulative(cumulativePeriods[key]);
+        return datasets2026[key] || datasets2026['2026_Aug'];
+    }
+
+    function get2026Key() {
+        const sel = document.getElementById('month2026');
+        return sel ? sel.value : '2026_Aug';
+    }
+
+    function renderDashboard(year) {
+        const sortBy = document.getElementById('sortBy' + year).value;
+        let data;
+        if (year === '2026') {
+            data = get2026Data();
+            const key = get2026Key();
+            const sub = document.getElementById('header2026sub');
+            if (sub) sub.textContent = (monthLabels[key] || key) + ' · Interactive ranking analysis for your sales team';
+        } else {
+            data = datasets[year];
+        }
+        let sorted;
+        if (sortBy === 'Close_Rate' && year === '2026') {
+            const key2026cr = get2026Key();
+            sorted = [...data].sort((a, b) => {
+                const apA = getAppts(a.Sales_Rep_Name, key2026cr);
+                const apB = getAppts(b.Sales_Rep_Name, key2026cr);
+                const crA = apA > 0 ? a.Total_Units / apA : 0;
+                const crB = apB > 0 ? b.Total_Units / apB : 0;
+                return crB - crA;
+            });
+        } else {
+            sorted = [...data].sort((a, b) => b[sortBy] - a[sortBy]);
+        }
+        const tbody = document.getElementById('tableBody' + year);
+        tbody.innerHTML = '';
+
+        if (sorted.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="13" style="text-align:center;padding:30px;color:#6b7280;font-style:italic;">No data yet for ${year}. Add reps to get started.</td></tr>`;
+        } else {
+            sorted.forEach((rep, i) => {
+                const row = document.createElement('tr');
+                if (i < 3) row.classList.add('highlight-top3');
+                if (i === 0) row.classList.add('rank-1');
+                if (i === 1) row.classList.add('rank-2');
+                if (i === 2) row.classList.add('rank-3');
+                const rankDisplay = `<span class="rank-num">#${i+1}</span>`;
+                const pc = v => v === 0 ? `<span class="plat-zero">—</span>` : `<span class="plat-count">${v}</span>`;
+                const key2026 = get2026Key();
+                const appts = year === '2026' ? getAppts(rep.Sales_Rep_Name, key2026) : null;
+                const closeRatePct = (appts && appts > 0 && rep.Total_Units > 0)
+                    ? Math.round((rep.Total_Units / appts) * 100)
+                    : null;
+                const closeRateClass = closeRatePct === null ? '' : closeRatePct >= 22 ? 'close-high' : closeRatePct >= 15 ? 'close-mid' : 'close-low';
+                const closeRateDisplay = closeRatePct !== null ? `<span class="${closeRateClass}">${closeRatePct}%</span>` : '—';
+                const apptCell = year === '2026'
+                    ? `<td class="num-cell">${appts > 0 ? appts : '<span class="plat-zero">—</span>'}</td><td class="num-cell">${closeRateDisplay}</td>`
+                    : '';
+                row.innerHTML = `
+                    <td style="width:50px">${rankDisplay}</td>
+                    <td><span class="rep-name">${rep.Sales_Rep_Name}</span></td>
+                    <td><span class="role-badge role-${rep.Role}">${rep.Role}</span></td>
+                    <td class="num-cell"><strong>${rep.Total_Units}</strong></td>
+                    <td>${pc(rep.Solo)}</td><td>${pc(rep.Ramp)}</td><td>${pc(rep.Pro)}</td><td>${pc(rep.Select)}</td><td>${pc(rep.Prime)}</td>
+                    ${apptCell}
+                    <td class="currency">${fmt(rep.Avg_ACV)}</td>
+                    <td class="currency">${fmt(rep.Avg_MRR)}</td>
+                    <td class="currency">${fmt(rep.Avg_Setup_Fee)}</td>
+                    <td class="currency">${fmt(rep.Total_Revenue)}</td>`;
+                tbody.appendChild(row);
+            });
+        }
+
+        const totalRev = data.reduce((s, r) => s + r.Total_Revenue, 0);
+        const totalUnits = data.reduce((s, r) => s + r.Total_Units, 0);
+        const avgACV = data.length ? data.reduce((s, r) => s + r.Avg_ACV, 0) / data.length : 0;
+        const avgMRR = data.length ? data.reduce((s, r) => s + r.Avg_MRR, 0) / data.length : 0;
+        const avgSetup = data.length ? data.reduce((s, r) => s + r.Avg_Setup_Fee, 0) / data.length : 0;
+
+        document.getElementById('avgACV' + year).textContent = data.length ? fmt(avgACV) : '—';
+        document.getElementById('avgMRR' + year).textContent = data.length ? fmt(avgMRR) : '—';
+        document.getElementById('avgSetupFee' + year).textContent = data.length ? fmt(avgSetup) : '—';
+        document.getElementById('totalRevenue' + year).textContent = data.length ? fmt(totalRev) : '—';
+        if (year === '2026') {
+            const el = document.getElementById('totalUnits2026');
+            if (el) el.textContent = totalUnits > 0 ? totalUnits : '—';
+            const key2026 = get2026Key();
+            const totalAppts = data.reduce((s, r) => s + getAppts(r.Sales_Rep_Name, key2026), 0);
+            const closeRateEl = document.getElementById('teamCloseRate2026');
+            if (closeRateEl) closeRateEl.textContent = totalAppts > 0 ? Math.round((totalUnits / totalAppts) * 100) + '%' : '—';
+        } else {
+            const el = document.getElementById('totalUnits2025');
+            if (el) el.textContent = totalUnits > 0 ? totalUnits : '—';
+        }
+
+        // If trend panel is open and 2026 month changed, refresh charts
+        if (year === '2026') {
+            const panel = document.getElementById('trendPanel');
+            if (panel && panel.classList.contains('open')) {
+                setTimeout(renderTrendCharts, 50);
+            }
+        }
+    }
+
+    renderDashboard('2025');
+    renderDashboard('2026');
+
+    // ── CHART.JS ──────────────────────────────────────────────────────────
+    let sideBySideChartInst = null;
+    let pctChangeChartInst  = null;
+
+    function toggleTrend() {
+        const panel = document.getElementById('trendPanel');
+        const btn   = document.getElementById('trendToggleBtn');
+        const isOpen = panel.classList.toggle('open');
+        btn.classList.toggle('open', isOpen);
+        btn.querySelector('span').textContent = isOpen ? '📈 Hide Year-Over-Year Trends' : '📈 View Year-Over-Year Trends';
+        if (isOpen) {
+            setTimeout(renderTrendCharts, 50); // wait for panel to be visible
+        }
+    }
+
+    function renderTrendCharts() {
+        const metric = document.getElementById('trendMetric').value;
+        const label  = metric === 'Avg_ACV' ? 'Avg ACV' : 'Avg MRR';
+        const fmt2   = v => '$' + v.toLocaleString('en-US', {minimumFractionDigits:0, maximumFractionDigits:0});
+
+        // ── Build annualized 2026 data ──────────────────────────────────────
+        // Count how many months of data exist in 2026
+        const allMonthKeys = ['2026_Jan','2026_Feb','2026_Mar','2026_Apr','2026_May','2026_Jun','2026_Jul','2026_Aug'];
+        const monthsWithData = allMonthKeys.filter(mk => {
+            const d = datasets2026[mk] || [];
+            return d.some(r => r.Total_Units > 0);
+        });
+        const monthsCompleted = monthsWithData.length || 1;
+        const annualLabel = `2026 Annualized (${monthsCompleted}mo × ${Math.round(12/monthsCompleted)}×)`;
+
+        // Build H1 cumulative totals
+        const h1Data = buildCumulative(monthsWithData);
+
+        // Annualize: scale revenue and units by (12 / monthsCompleted); ACV/MRR are averages so keep as-is
+        const scaleFactor = 12 / monthsCompleted;
+        const annualized2026 = h1Data.map(r => ({
+            ...r,
+            Total_Units:   Math.round(r.Total_Units * scaleFactor),
+            Total_Revenue: Math.round(r.Total_Revenue * scaleFactor),
+            // ACV and MRR are per-deal averages — no scaling needed
+        }));
+
+        // Build matched rep list (only reps in both years)
+        const reps2025 = {};
+        datasets['2025'].forEach(r => reps2025[r.Sales_Rep_Name] = r);
+        const matched = annualized2026.filter(r => reps2025[r.Sales_Rep_Name]);
+
+        // ── Update chart subtitles ──────────────────────────────────────────
+        const s  = document.getElementById('subSideBySide');
+        const sp = document.getElementById('subPctChange');
+        const su = document.getElementById('subUnits');
+        const sr = document.getElementById('subRevenue');
+        if (s)  s.textContent  = `2025 actual full year vs. 2026 annualized pace (${monthsCompleted} months × ${Math.round(scaleFactor)}×)`;
+        if (sp) sp.textContent = `% change from 2025 actual → 2026 annualized pace`;
+        if (su) su.textContent = `2025 actual vs. 2026 annualized units — sorted by 2025 volume`;
+        if (sr) sr.textContent = `2025 actual vs. 2026 annualized revenue — sorted by 2025 revenue`;
+
+        const sbSorted = [...matched].sort((a,b) => reps2025[b.Sales_Rep_Name][metric] - reps2025[a.Sales_Rep_Name][metric]);
+        const sbLabels = sbSorted.map(r => r.Sales_Rep_Name.split(' ')[0]);
+        const sb2025   = sbSorted.map(r => reps2025[r.Sales_Rep_Name][metric]);
+        const sb2026   = sbSorted.map(r => r[metric]);
+
+        // Sort pct-change by biggest improvement
+        const pctData = matched.map(r => {
+            const v25 = reps2025[r.Sales_Rep_Name][metric];
+            const v26 = r[metric];
+            return { name: r.Sales_Rep_Name.split(' ')[0], pct: v25 > 0 ? ((v26 - v25) / v25) * 100 : 0, v25, v26 };
+        }).sort((a,b) => b.pct - a.pct);
+
+        const pctLabels  = pctData.map(r => r.name);
+        const pctValues  = pctData.map(r => r.pct);
+        const pctColors  = pctValues.map(v => v >= 0 ? 'rgba(34,197,94,0.85)'  : 'rgba(239,68,68,0.85)');
+        const pctBorders = pctValues.map(v => v >= 0 ? '#22c55e' : '#ef4444');
+
+        // ── Chart 1: Side-by-Side ──
+        if (sideBySideChartInst) sideBySideChartInst.destroy();
+        const ctx1 = document.getElementById('sideBySideChart').getContext('2d');
+        sideBySideChartInst = new Chart(ctx1, {
+            type: 'bar',
+            data: {
+                labels: sbLabels,
+                datasets: [
+                    {
+                        label: '2025 Full Year',
+                        data: sb2025,
+                        backgroundColor: 'rgba(102,126,234,0.8)',
+                        borderColor: '#667eea',
+                        borderWidth: 1.5,
+                        borderRadius: 4,
+                    },
+                    {
+                        label: annualLabel,
+                        data: sb2026,
+                        backgroundColor: 'rgba(67,198,172,0.8)',
+                        borderColor: '#43c6ac',
+                        borderWidth: 1.5,
+                        borderRadius: 4,
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: ctx => ` ${ctx.dataset.label}: ${fmt2(ctx.raw)}`
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        ticks: { font: { size: 12, weight: '600' } }
+                    },
+                    y: {
+                        grid: { color: 'rgba(0,0,0,0.05)' },
+                        ticks: {
+                            callback: v => fmt2(v),
+                            font: { size: 11 }
+                        },
+                        beginAtZero: false
+                    }
+                }
+            }
+        });
+
+        // ── Chart 2: % Change Leaderboard (horizontal) ──
+        if (pctChangeChartInst) pctChangeChartInst.destroy();
+        const ctx2 = document.getElementById('pctChangeChart').getContext('2d');
+        pctChangeChartInst = new Chart(ctx2, {
+            type: 'bar',
+            data: {
+                labels: pctLabels,
+                datasets: [{
+                    label: '% Change',
+                    data: pctValues,
+                    backgroundColor: pctColors,
+                    borderColor: pctBorders,
+                    borderWidth: 1.5,
+                    borderRadius: 4,
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: ctx => {
+                                const d = pctData[ctx.dataIndex];
+                                return [
+                                    ` Change: ${ctx.raw >= 0 ? '+' : ''}${ctx.raw.toFixed(1)}%`,
+                                    ` 2025 Actual: ${fmt2(d.v25)}`,
+                                    ` 2026 Annualized: ${fmt2(d.v26)}`
+                                ];
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { color: 'rgba(0,0,0,0.05)' },
+                        ticks: {
+                            callback: v => (v >= 0 ? '+' : '') + v.toFixed(1) + '%',
+                            font: { size: 11 }
+                        }
+                    },
+                    y: {
+                        grid: { display: false },
+                        ticks: { font: { size: 12, weight: '600' } }
+                    }
+                }
+            }
+        });
+
+        // ── Chart 3: Total Units Sold ──
+        const unitsSorted = [...matched].sort((a,b) => reps2025[b.Sales_Rep_Name].Total_Units - reps2025[a.Sales_Rep_Name].Total_Units);
+        if (window.unitsChartInst) window.unitsChartInst.destroy();
+        const ctx3 = document.getElementById('unitsChart').getContext('2d');
+        window.unitsChartInst = new Chart(ctx3, {
+            type: 'bar',
+            data: {
+                labels: unitsSorted.map(r => r.Sales_Rep_Name.split(' ')[0]),
+                datasets: [
+                    {
+                        label: '2025 Actual',
+                        data: unitsSorted.map(r => reps2025[r.Sales_Rep_Name].Total_Units),
+                        backgroundColor: 'rgba(102,126,234,0.8)',
+                        borderColor: '#667eea',
+                        borderWidth: 1.5,
+                        borderRadius: 4,
+                    },
+                    {
+                        label: '2026 Annualized',
+                        data: unitsSorted.map(r => r.Total_Units),
+                        backgroundColor: 'rgba(67,198,172,0.8)',
+                        borderColor: '#43c6ac',
+                        borderWidth: 1.5,
+                        borderRadius: 4,
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                        labels: { font: { size: 12 }, usePointStyle: true, pointStyle: 'rect' }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: ctx => ` ${ctx.dataset.label}: ${ctx.raw} units`
+                        }
+                    }
+                },
+                scales: {
+                    x: { grid: { display: false }, ticks: { font: { size: 12, weight: '600' } } },
+                    y: {
+                        grid: { color: 'rgba(0,0,0,0.05)' },
+                        ticks: { font: { size: 11 } },
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // ── Chart 4: Total Revenue ──
+        const fmtRev = v => '$' + (v / 1000).toFixed(0) + 'K';
+        const revSorted = [...matched].sort((a,b) => reps2025[b.Sales_Rep_Name].Total_Revenue - reps2025[a.Sales_Rep_Name].Total_Revenue);
+        if (window.revenueChartInst) window.revenueChartInst.destroy();
+        const ctx4 = document.getElementById('revenueChart').getContext('2d');
+        window.revenueChartInst = new Chart(ctx4, {
+            type: 'bar',
+            data: {
+                labels: revSorted.map(r => r.Sales_Rep_Name.split(' ')[0]),
+                datasets: [
+                    {
+                        label: '2025 Actual',
+                        data: revSorted.map(r => reps2025[r.Sales_Rep_Name].Total_Revenue),
+                        backgroundColor: 'rgba(118,75,162,0.8)',
+                        borderColor: '#764ba2',
+                        borderWidth: 1.5,
+                        borderRadius: 4,
+                    },
+                    {
+                        label: '2026 Annualized',
+                        data: revSorted.map(r => r.Total_Revenue),
+                        backgroundColor: 'rgba(255,193,7,0.8)',
+                        borderColor: '#ffc107',
+                        borderWidth: 1.5,
+                        borderRadius: 4,
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                        labels: { font: { size: 12 }, usePointStyle: true, pointStyle: 'rect' }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: ctx => ` ${ctx.dataset.label}: $${ctx.raw.toLocaleString('en-US', {minimumFractionDigits:0, maximumFractionDigits:0})}`
+                        }
+                    }
+                },
+                scales: {
+                    x: { grid: { display: false }, ticks: { font: { size: 12, weight: '600' } } },
+                    y: {
+                        grid: { color: 'rgba(0,0,0,0.05)' },
+                        ticks: { callback: v => fmtRev(v), font: { size: 11 } },
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    }
+
+</script>
+</body>
+</html>
