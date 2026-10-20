@@ -358,13 +358,14 @@
                     <option value="2026_May">May 2026</option>
                     <option value="2026_Jun">June 2026</option>
                     <option value="2026_Jul">July 2026</option>
-                    <option value="2026_Aug" selected>August 2026</option>
+                    <option value="2026_Aug">August 2026</option>
+                    <option value="2026_Sep" selected>September 2026</option>
                     <option disabled>──────────────</option>
                     <option value="2026_Q1">Q1 2026 (Jan–Mar)</option>
                     <option value="2026_Q2">Q2 2026 (Apr–Jun)</option>
-                    <option value="2026_Q3">Q3 2026 (Jul–Aug)</option>
+                    <option value="2026_Q3">Q3 2026 (Jul–Sep)</option>
                     <option value="2026_H1">H1 2026 (Jan–Jun)</option>
-                    <option value="2026_YTD">YTD 2026 (Jan–Aug)</option>
+                    <option value="2026_YTD">YTD 2026 (Jan–Sep)</option>
                 </select>
             </div>
             <div class="controls-group">
@@ -677,6 +678,22 @@
             {"Sales_Rep_Name":"Suzanne McLean","Total_Units":12,"Total_Revenue":160159.0,"Avg_ACV":13346.58,"Avg_MRR":1112.21,"Avg_Setup_Fee":158.0,"Role":"NAE","Solo":4,"Ramp":7,"Pro":1,"Select":0,"Prime":0},
             {"Sales_Rep_Name":"Trey Carrion","Total_Units":0,"Total_Revenue":0.0,"Avg_ACV":0,"Avg_MRR":0,"Avg_Setup_Fee":0,"Role":"NAE","Solo":0,"Ramp":0,"Pro":0,"Select":0,"Prime":0},
             {"Sales_Rep_Name":"Tricia Sandberg","Total_Units":13,"Total_Revenue":155056.0,"Avg_ACV":11927.38,"Avg_MRR":993.95,"Avg_Setup_Fee":111.38,"Role":"NAE","Solo":9,"Ramp":3,"Pro":0,"Select":0,"Prime":1}
+        ],
+        '2026_Sep': [
+            {"Sales_Rep_Name":"Austin Owen","Total_Units":11,"Total_Revenue":135992.0,"Avg_ACV":12362.91,"Avg_MRR":1030.24,"Avg_Setup_Fee":108.45,"Role":"NAE","Solo":2,"Ramp":6,"Pro":0,"Select":0,"Prime":3},
+            {"Sales_Rep_Name":"Chuck Crosby","Total_Units":0,"Total_Revenue":0.0,"Avg_ACV":0,"Avg_MRR":0,"Avg_Setup_Fee":0,"Role":"NAE","Solo":0,"Ramp":0,"Pro":0,"Select":0,"Prime":0},
+            {"Sales_Rep_Name":"Dave McGinley","Total_Units":6,"Total_Revenue":72715.0,"Avg_ACV":12119.17,"Avg_MRR":1009.93,"Avg_Setup_Fee":124.17,"Role":"NAE","Solo":3,"Ramp":2,"Pro":0,"Select":0,"Prime":1},
+            {"Sales_Rep_Name":"Gordon Black","Total_Units":15,"Total_Revenue":181243.0,"Avg_ACV":12082.87,"Avg_MRR":1006.91,"Avg_Setup_Fee":93.07,"Role":"NAE","Solo":5,"Ramp":2,"Pro":0,"Select":0,"Prime":8},
+            {"Sales_Rep_Name":"Just Frierson","Total_Units":11,"Total_Revenue":142980.0,"Avg_ACV":12998.18,"Avg_MRR":1083.18,"Avg_Setup_Fee":108.18,"Role":"NAE","Solo":7,"Ramp":1,"Pro":2,"Select":0,"Prime":1},
+            {"Sales_Rep_Name":"Kevin Hoehn","Total_Units":0,"Total_Revenue":0.0,"Avg_ACV":0,"Avg_MRR":0,"Avg_Setup_Fee":0,"Role":"NAE","Solo":0,"Ramp":0,"Pro":0,"Select":0,"Prime":0},
+            {"Sales_Rep_Name":"Krissy Stafford","Total_Units":3,"Total_Revenue":47576.0,"Avg_ACV":15858.67,"Avg_MRR":1321.56,"Avg_Setup_Fee":199.67,"Role":"AE","Solo":1,"Ramp":0,"Pro":1,"Select":0,"Prime":1},
+            {"Sales_Rep_Name":"Mitch Baldwin","Total_Units":11,"Total_Revenue":166040.0,"Avg_ACV":15094.55,"Avg_MRR":1257.88,"Avg_Setup_Fee":203.73,"Role":"SAE","Solo":1,"Ramp":3,"Pro":0,"Select":0,"Prime":7},
+            {"Sales_Rep_Name":"Nathaniel McCormick","Total_Units":9,"Total_Revenue":110264.0,"Avg_ACV":12251.56,"Avg_MRR":1020.96,"Avg_Setup_Fee":166.45,"Role":"AE","Solo":1,"Ramp":2,"Pro":0,"Select":0,"Prime":6},
+            {"Sales_Rep_Name":"Ross Wheeler","Total_Units":12,"Total_Revenue":157692.0,"Avg_ACV":13141.0,"Avg_MRR":1095.08,"Avg_Setup_Fee":187.5,"Role":"NAE","Solo":2,"Ramp":2,"Pro":0,"Select":0,"Prime":8},
+            {"Sales_Rep_Name":"Stephen Kessler","Total_Units":0,"Total_Revenue":0.0,"Avg_ACV":0,"Avg_MRR":0,"Avg_Setup_Fee":0,"Role":"NAE","Solo":0,"Ramp":0,"Pro":0,"Select":0,"Prime":0},
+            {"Sales_Rep_Name":"Suzanne McLean","Total_Units":9,"Total_Revenue":107188.0,"Avg_ACV":11909.78,"Avg_MRR":992.48,"Avg_Setup_Fee":105.22,"Role":"NAE","Solo":0,"Ramp":0,"Pro":0,"Select":0,"Prime":9},
+            {"Sales_Rep_Name":"Trey Carrion","Total_Units":0,"Total_Revenue":0.0,"Avg_ACV":0,"Avg_MRR":0,"Avg_Setup_Fee":0,"Role":"NAE","Solo":0,"Ramp":0,"Pro":0,"Select":0,"Prime":0},
+            {"Sales_Rep_Name":"Tricia Sandberg","Total_Units":16,"Total_Revenue":197592.0,"Avg_ACV":12349.5,"Avg_MRR":1029.12,"Avg_Setup_Fee":109.06,"Role":"NAE","Solo":3,"Ramp":2,"Pro":1,"Select":0,"Prime":10}
         ]
     };
 
@@ -684,23 +701,27 @@
 
     // ── Appointments data by rep and month ──────────────────────────────────
     const apptData = {
-        'Austin Owen':        { '2026_Jan':47, '2026_Feb':46, '2026_Mar':68, '2026_Apr':73, '2026_May':56, '2026_Jun':55, '2026_Jul':49, '2026_Aug':56 },
-        'Chuck Crosby':       { '2026_Jan':43, '2026_Feb':48, '2026_Mar':63, '2026_Apr':71, '2026_May':50, '2026_Jun':0,  '2026_Jul':0,  '2026_Aug':0  },
-        'Dave McGinley':      { '2026_Jan':37, '2026_Feb':34, '2026_Mar':50, '2026_Apr':54, '2026_May':34, '2026_Jun':31, '2026_Jul':41, '2026_Aug':43 },
-        'Gordon Black':       { '2026_Jan':43, '2026_Feb':0,  '2026_Mar':0,  '2026_Apr':0,  '2026_May':52, '2026_Jun':54, '2026_Jul':52, '2026_Aug':51 },
-        'Just Frierson':      { '2026_Jan':51, '2026_Feb':50, '2026_Mar':74, '2026_Apr':79, '2026_May':53, '2026_Jun':64, '2026_Jul':64, '2026_Aug':56 },
-        'Kevin Hoehn':        { '2026_Jan':51, '2026_Feb':48, '2026_Mar':0,  '2026_Apr':0,  '2026_May':0,  '2026_Jun':0,  '2026_Jul':0,  '2026_Aug':0  },
-        'Krissy Stafford':    { '2026_Jan':0,  '2026_Feb':0,  '2026_Mar':0,  '2026_Apr':0,  '2026_May':0,  '2026_Jun':36, '2026_Jul':36, '2026_Aug':36 },
-        'Mitch Baldwin':      { '2026_Jan':35, '2026_Feb':40, '2026_Mar':54, '2026_Apr':67, '2026_May':51, '2026_Jun':52, '2026_Jul':46, '2026_Aug':43 },
-        'Nathaniel McCormick':{ '2026_Jan':32, '2026_Feb':33, '2026_Mar':48, '2026_Apr':49, '2026_May':42, '2026_Jun':45, '2026_Jul':22, '2026_Aug':35 },
-        'Ross Wheeler':       { '2026_Jan':52, '2026_Feb':48, '2026_Mar':71, '2026_Apr':78, '2026_May':53, '2026_Jun':49, '2026_Jul':39, '2026_Aug':53 },
-        'Stephen Kessler':    { '2026_Jan':50, '2026_Feb':48, '2026_Mar':73, '2026_Apr':61, '2026_May':65, '2026_Jun':59, '2026_Jul':50, '2026_Aug':55 },
-        'Suzanne McLean':     { '2026_Jan':47, '2026_Feb':45, '2026_Mar':69, '2026_Apr':61, '2026_May':50, '2026_Jun':45, '2026_Jul':50, '2026_Aug':53 },
-        'Trey Carrion':       { '2026_Jan':0,  '2026_Feb':0,  '2026_Mar':0,  '2026_Apr':0,  '2026_May':0,  '2026_Jun':0,  '2026_Jul':0,  '2026_Aug':0  },
-        'Tricia Sandberg':    { '2026_Jan':51, '2026_Feb':44, '2026_Mar':63, '2026_Apr':23, '2026_May':0,  '2026_Jun':0,  '2026_Jul':6,  '2026_Aug':48 },
+        'Austin Owen':        { '2026_Jan':47, '2026_Feb':46, '2026_Mar':68, '2026_Apr':73, '2026_May':56, '2026_Jun':55, '2026_Jul':49, '2026_Aug':56, '2026_Sep':58 },
+        'Chuck Crosby':       { '2026_Jan':43, '2026_Feb':48, '2026_Mar':63, '2026_Apr':71, '2026_May':50, '2026_Jun':0,  '2026_Jul':0,  '2026_Aug':0, '2026_Sep':0  },
+        'Dave McGinley':      { '2026_Jan':37, '2026_Feb':34, '2026_Mar':50, '2026_Apr':54, '2026_May':34, '2026_Jun':31, '2026_Jul':41, '2026_Aug':43, '2026_Sep':36 },
+        'Gordon Black':       { '2026_Jan':43, '2026_Feb':0,  '2026_Mar':0,  '2026_Apr':0,  '2026_May':52, '2026_Jun':54, '2026_Jul':52, '2026_Aug':51, '2026_Sep':49 },
+        'Just Frierson':      { '2026_Jan':51, '2026_Feb':50, '2026_Mar':74, '2026_Apr':79, '2026_May':53, '2026_Jun':64, '2026_Jul':64, '2026_Aug':56, '2026_Sep':65 },
+        'Kevin Hoehn':        { '2026_Jan':51, '2026_Feb':48, '2026_Mar':0,  '2026_Apr':0,  '2026_May':0,  '2026_Jun':0,  '2026_Jul':0,  '2026_Aug':0, '2026_Sep':0  },
+        'Krissy Stafford':    { '2026_Jan':0,  '2026_Feb':0,  '2026_Mar':0,  '2026_Apr':0,  '2026_May':0,  '2026_Jun':36, '2026_Jul':36, '2026_Aug':36, '2026_Sep':36 },
+        'Mitch Baldwin':      { '2026_Jan':35, '2026_Feb':40, '2026_Mar':54, '2026_Apr':67, '2026_May':51, '2026_Jun':52, '2026_Jul':46, '2026_Aug':43, '2026_Sep':36 },
+        'Nathaniel McCormick':{ '2026_Jan':32, '2026_Feb':33, '2026_Mar':48, '2026_Apr':49, '2026_May':42, '2026_Jun':45, '2026_Jul':22, '2026_Aug':35, '2026_Sep':27 },
+        'Ross Wheeler':       { '2026_Jan':52, '2026_Feb':48, '2026_Mar':71, '2026_Apr':78, '2026_May':53, '2026_Jun':49, '2026_Jul':39, '2026_Aug':53, '2026_Sep':53 },
+        'Stephen Kessler':    { '2026_Jan':50, '2026_Feb':48, '2026_Mar':73, '2026_Apr':61, '2026_May':65, '2026_Jun':59, '2026_Jul':50, '2026_Aug':55, '2026_Sep':0 },
+        'Suzanne McLean':     { '2026_Jan':47, '2026_Feb':45, '2026_Mar':69, '2026_Apr':61, '2026_May':50, '2026_Jun':45, '2026_Jul':50, '2026_Aug':53, '2026_Sep':43 },
+        'Trey Carrion':       { '2026_Jan':0,  '2026_Feb':0,  '2026_Mar':0,  '2026_Apr':0,  '2026_May':0,  '2026_Jun':0,  '2026_Jul':0,  '2026_Aug':0, '2026_Sep':0  },
+        'Tricia Sandberg':    { '2026_Jan':51, '2026_Feb':44, '2026_Mar':63, '2026_Apr':23, '2026_May':0,  '2026_Jun':0,  '2026_Jul':6,  '2026_Aug':48, '2026_Sep':52 },
     };
 
+    // Months whose appointment counts haven't been loaded yet; close rate shows "—" for any period including them.
+    // Once September appointments are added to apptData, set this to [].
+    const apptPendingMonths = [];
     function getAppts(repName, key) {
+        if ((cumulativePeriods[key] || [key]).some(k => apptPendingMonths.includes(k))) return 0;
         const repAppts = apptData[repName];
         if (!repAppts) return 0;
         if (cumulativePeriods[key]) {
@@ -712,18 +733,18 @@
     const monthLabels = {
         '2026_Jan': 'January 2026', '2026_Feb': 'February 2026', '2026_Mar': 'March 2026',
         '2026_Apr': 'April 2026', '2026_May': 'May 2026', '2026_Jun': 'June 2026',
-        '2026_Jul': 'July 2026', '2026_Aug': 'August 2026',
+        '2026_Jul': 'July 2026', '2026_Aug': 'August 2026', '2026_Sep': 'September 2026',
         '2026_Q1': 'Q1 2026 (Jan–Mar)', '2026_Q2': 'Q2 2026 (Apr–Jun)',
-        '2026_Q3': 'Q3 2026 (Jul–Aug)', '2026_H1': 'H1 2026 (Jan–Jun)',
-        '2026_YTD': 'YTD 2026 (Jan–Aug)'
+        '2026_Q3': 'Q3 2026 (Jul–Sep)', '2026_H1': 'H1 2026 (Jan–Jun)',
+        '2026_YTD': 'YTD 2026 (Jan–Sep)'
     };
 
     const cumulativePeriods = {
         '2026_Q1':  ['2026_Jan', '2026_Feb', '2026_Mar'],
         '2026_Q2':  ['2026_Apr', '2026_May', '2026_Jun'],
-        '2026_Q3':  ['2026_Jul', '2026_Aug'],
+        '2026_Q3':  ['2026_Jul', '2026_Aug', '2026_Sep'],
         '2026_H1':  ['2026_Jan', '2026_Feb', '2026_Mar', '2026_Apr', '2026_May', '2026_Jun'],
-        '2026_YTD': ['2026_Jan', '2026_Feb', '2026_Mar', '2026_Apr', '2026_May', '2026_Jun', '2026_Jul', '2026_Aug']
+        '2026_YTD': ['2026_Jan', '2026_Feb', '2026_Mar', '2026_Apr', '2026_May', '2026_Jun', '2026_Jul', '2026_Aug', '2026_Sep']
     };
 
     function buildCumulative(monthKeys) {
@@ -762,14 +783,14 @@
 
     function get2026Data() {
         const sel = document.getElementById('month2026');
-        const key = sel ? sel.value : '2026_Aug';
+        const key = sel ? sel.value : '2026_Sep';
         if (cumulativePeriods[key]) return buildCumulative(cumulativePeriods[key]);
-        return datasets2026[key] || datasets2026['2026_Aug'];
+        return datasets2026[key] || datasets2026['2026_Sep'];
     }
 
     function get2026Key() {
         const sel = document.getElementById('month2026');
-        return sel ? sel.value : '2026_Aug';
+        return sel ? sel.value : '2026_Sep';
     }
 
     function renderDashboard(year) {
@@ -904,7 +925,7 @@
 
         // ── Build annualized 2026 data ──────────────────────────────────────
         // Count how many months of data exist in 2026
-        const allMonthKeys = ['2026_Jan','2026_Feb','2026_Mar','2026_Apr','2026_May','2026_Jun','2026_Jul','2026_Aug'];
+        const allMonthKeys = ['2026_Jan','2026_Feb','2026_Mar','2026_Apr','2026_May','2026_Jun','2026_Jul','2026_Aug','2026_Sep'];
         const monthsWithData = allMonthKeys.filter(mk => {
             const d = datasets2026[mk] || [];
             return d.some(r => r.Total_Units > 0);
